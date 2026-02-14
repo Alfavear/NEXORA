@@ -29,8 +29,9 @@ model Branch {
   company   Company @relation(fields: [companyId], references: [id])
   companyId Int
 
-  users     User[]
+  userBranches UserBranch[]
 }
+
 
 model Role {
   id    Int    @id @default(autoincrement())
@@ -50,9 +51,21 @@ model User {
   company   Company @relation(fields: [companyId], references: [id])
   companyId Int
 
-  branch   Branch @relation(fields: [branchId], references: [id])
-  branchId Int
-
   role   Role @relation(fields: [roleId], references: [id])
   roleId Int
+
+  userBranches UserBranch[]
+}
+
+model UserBranch {
+  userId     Int
+  branchId   Int
+  isActive   Boolean  @default(true)
+  assignedAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  branch Branch @relation(fields: [branchId], references: [id])
+
+  @@id([userId, branchId])
+  @@index([branchId])
 }
