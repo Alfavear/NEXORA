@@ -1,3 +1,11 @@
+![NestJS](https://img.shields.io/badge/NestJS-API-red)
+![Prisma](https://img.shields.io/badge/ORM-Prisma-blue)
+![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-336791)
+![React](https://img.shields.io/badge/Frontend-React-61DAFB)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-In%20Development-orange)
+
+
 📦 NEXORA
 Sistema de Inventarios Multi-Sede para Almacén de Muebles
 
