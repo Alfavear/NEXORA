@@ -1,7 +1,7 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-export default function Shell({ children }: { children: React.ReactNode }) {
+export default function Shell() {
   const { me, logout, switchBranch } = useAuth();
   const loc = useLocation();
 
@@ -50,6 +50,14 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <nav className="card p-3">
             <NavLink to="/" active={loc.pathname === "/"}>Dashboard</NavLink>
             <NavLink to="/users" active={loc.pathname.startsWith("/users")}>Usuarios</NavLink>
+
+            <div className="my-2 border-t border-slate-200"></div>
+            <div className="px-3 py-1 text-xs font-semibold text-slate-500 uppercase">
+              Catalogo
+            </div>
+
+            <NavLink to="/suppliers" active={loc.pathname.startsWith("/suppliers")}>Proveedores</NavLink>
+            <NavLink to="/customers" active={loc.pathname.startsWith("/customers")}>Clientes</NavLink>
           </nav>
 
           {me && (
@@ -57,13 +65,18 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <div className="text-sm font-semibold">{me.name}</div>
               <div className="text-xs text-slate-600">{me.email}</div>
               <div className="mt-3 text-xs text-slate-500">
-                Sede activa: <span className="font-medium text-slate-700">{me.branchName ?? "-"}</span>
+                Sede activa:{" "}
+                <span className="font-medium text-slate-700">
+                  {me.branchName ?? "-"}
+                </span>
               </div>
             </div>
           )}
         </aside>
 
-        <main className="col-span-12 md:col-span-9">{children}</main>
+        <main className="col-span-12 md:col-span-9">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

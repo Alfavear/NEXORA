@@ -1,4 +1,4 @@
-import { http } from "./http";
+import http from "./http";
 
 export type LoginPayload = { email: string; password: string; branchId?: number };
 export type LoginResponse = { access_token: string };
