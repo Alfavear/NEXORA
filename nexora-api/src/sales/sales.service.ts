@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { CreateReturnDto } from './dto/create-return.dto';
@@ -9,17 +9,20 @@ export class SalesService {
 
   async getUserContext(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('Usuario inválido');
     return { companyId: user.companyId };
   }
 
-  async createSale(userId: number, dto: CreateSaleDto) {
+  async createSale(userId: number, branchId: number, dto: CreateSaleDto) {
     const { companyId } = await this.getUserContext(userId);
 
     const sale = await this.prisma.sale.create({
       data: {
         companyId,
-        branchId: 1,
+        branchId,
         sellerId: userId,
+        customerId: dto.customerId,
+        notes: dto.notes,
         systemNumber: `VTA-${Date.now()}`,
         externalReceiptNumber: dto.externalReceiptNumber,
       },
@@ -29,11 +32,11 @@ export class SalesService {
 
     for (const item of dto.items) {
       const stock = await this.prisma.branchStock.findFirst({
-        where: { itemId: item.itemId, branchId: 1 },
+        where: { itemId: item.itemId, branchId },
       });
 
       if (!stock || Number(stock.quantity) < item.quantity) {
-        throw new BadRequestException('Stock insuficiente');
+        throw new BadRequestException(`Stock insuficiente para item ${item.itemId}`);
       }
 
       const newQty = Number(stock.quantity) - item.quantity;
@@ -46,8 +49,9 @@ export class SalesService {
       await this.prisma.inventoryMovement.create({
         data: {
           companyId,
-          branchId: 1,
+          branchId,
           itemId: item.itemId,
+          createdById: userId,
           type: 'SALE',
           quantity: item.quantity,
           balanceAfter: newQty,
@@ -68,39 +72,90 @@ export class SalesService {
       });
     }
 
-    return this.prisma.sale.update({ where: { id: sale.id }, data: { total, subtotal: total } });
+    return this.prisma.sale.update({
+      where: { id: sale.id },
+      data: { total, subtotal: total },
+      include: {
+        customer: true,
+        details: { include: { item: true } },
+      },
+    });
   }
 
   async findAll(userId: number) {
     const { companyId } = await this.getUserContext(userId);
-    return this.prisma.sale.findMany({ where: { companyId }, include: { details: true } });
+    return this.prisma.sale.findMany({
+      where: { companyId },
+      include: {
+        customer: true,
+        details: { include: { item: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findOne(userId: number, id: number) {
-    return this.prisma.sale.findUnique({ where: { id }, include: { details: true } });
+    const { companyId } = await this.getUserContext(userId);
+    const sale = await this.prisma.sale.findFirst({
+      where: { id, companyId },
+      include: {
+        customer: true,
+        details: { include: { item: true } },
+        returns: { include: { details: { include: { item: true } } } },
+      },
+    });
+    if (!sale) throw new NotFoundException('Venta no encontrada');
+    return sale;
   }
 
   async createReturn(userId: number, saleId: number, dto: CreateReturnDto) {
     const { companyId } = await this.getUserContext(userId);
 
-    const sale = await this.prisma.sale.findUnique({ where: { id: saleId } });
+    const sale = await this.prisma.sale.findFirst({
+      where: { id: saleId, companyId },
+      include: {
+        details: true,
+        returns: { include: { details: true } },
+      },
+    });
 
     if (!sale) throw new BadRequestException('Venta no encontrada');
+
+    const returnedByItem = new Map<number, number>();
+    for (const ret of sale.returns) {
+      for (const det of ret.details) {
+        returnedByItem.set(det.itemId, (returnedByItem.get(det.itemId) ?? 0) + Number(det.quantity));
+      }
+    }
 
     const ret = await this.prisma.saleReturn.create({
       data: {
         companyId,
         branchId: sale.branchId,
         saleId,
+        customerId: sale.customerId,
         createdById: userId,
         systemNumber: `DEV-${Date.now()}`,
       },
     });
 
     for (const item of dto.items) {
+      const soldDetail = sale.details.find((d) => d.itemId === item.itemId);
+      if (!soldDetail) throw new BadRequestException(`El item ${item.itemId} no pertenece a la venta`);
+
+      const soldQty = Number(soldDetail.quantity);
+      const prevReturned = returnedByItem.get(item.itemId) ?? 0;
+      if (prevReturned + item.quantity > soldQty) {
+        throw new BadRequestException(`No puedes devolver mas de lo vendido para item ${item.itemId}`);
+      }
+
       const stock = await this.prisma.branchStock.findFirst({
         where: { itemId: item.itemId, branchId: sale.branchId },
       });
+
+      if (!stock) {
+        throw new BadRequestException(`Stock no inicializado para item ${item.itemId} en la sede`);
+      }
 
       const newQty = Number(stock.quantity) + item.quantity;
 
@@ -111,6 +166,7 @@ export class SalesService {
           companyId,
           branchId: sale.branchId,
           itemId: item.itemId,
+          createdById: userId,
           type: 'RETURN_SALE',
           quantity: item.quantity,
           balanceAfter: newQty,
@@ -121,14 +177,18 @@ export class SalesService {
       await this.prisma.saleReturnDetail.create({
         data: {
           saleReturnId: ret.id,
+          saleDetailId: soldDetail.id,
           itemId: item.itemId,
           quantity: item.quantity,
-          unitPrice: 0,
-          subtotal: 0,
+          unitPrice: soldDetail.unitPrice,
+          subtotal: Number(soldDetail.unitPrice) * item.quantity,
         },
       });
     }
 
-    return ret;
+    return this.prisma.saleReturn.findUnique({
+      where: { id: ret.id },
+      include: { details: { include: { item: true } }, sale: true },
+    });
   }
 }

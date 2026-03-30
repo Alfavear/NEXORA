@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Suppliers from "./pages/Suppliers";
 import Customers from "./pages/Customers";
+import Sales from "./pages/Sales";
+import Returns from "./pages/Returns";
 
 function RequireAuth() {
   const { token, loading } = useAuth();
@@ -26,6 +28,8 @@ export default function App() {
             <Route path="/users" element={<Users />} />
             <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/customers" element={<Customers />} />
+            <Route path="/sales" element={<Sales />} />
+            <Route path="/returns" element={<Returns />} />
           </Route>
         </Routes>
       </BrowserRouter>
