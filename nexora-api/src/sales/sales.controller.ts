@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
@@ -17,6 +17,11 @@ export class SalesController {
   @Get()
   findAll(@Req() req: any) {
     return this.service.findAll(req.user.sub);
+  }
+
+  @Get('report')
+  report(@Req() req: any, @Query('from') from?: string, @Query('to') to?: string) {
+    return this.service.getReport(req.user.sub, from, to);
   }
 
   @Get(':id')
