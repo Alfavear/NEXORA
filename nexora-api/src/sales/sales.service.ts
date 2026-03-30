@@ -191,4 +191,46 @@ export class SalesService {
       include: { details: { include: { item: true } }, sale: true },
     });
   }
+
+  async getReport(userId: number, from?: string, to?: string) {
+    const { companyId } = await this.getUserContext(userId);
+
+    const where: any = { companyId };
+    if (from || to) {
+      where.createdAt = {};
+      if (from) where.createdAt.gte = new Date(`${from}T00:00:00.000Z`);
+      if (to) where.createdAt.lte = new Date(`${to}T23:59:59.999Z`);
+    }
+
+    const sales = await this.prisma.sale.findMany({
+      where,
+      include: { customer: true, details: { include: { item: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const totalSales = sales.length;
+    const totalRevenue = sales.reduce((acc, sale) => acc + Number(sale.total), 0);
+
+    const byDayMap = new Map<string, { date: string; total: number; count: number }>();
+    for (const sale of sales) {
+      const date = sale.createdAt.toISOString().slice(0, 10);
+      const current = byDayMap.get(date) ?? { date, total: 0, count: 0 };
+      current.total += Number(sale.total);
+      current.count += 1;
+      byDayMap.set(date, current);
+    }
+
+    const byDay = Array.from(byDayMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+      filters: { from: from ?? null, to: to ?? null },
+      summary: {
+        totalSales,
+        totalRevenue,
+        averageTicket: totalSales ? Number((totalRevenue / totalSales).toFixed(2)) : 0,
+      },
+      byDay,
+      sales,
+    };
+  }
 }
