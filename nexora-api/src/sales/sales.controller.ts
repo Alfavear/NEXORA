@@ -11,7 +11,7 @@ export class SalesController {
 
   @Post()
   create(@Req() req: any, @Body() dto: CreateSaleDto) {
-    return this.service.createSale(req.user.sub, dto);
+    return this.service.createSale(req.user.sub, req.user.branchId, dto);
   }
 
   @Get()
