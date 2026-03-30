@@ -9,6 +9,7 @@ import Customers from "./pages/Customers";
 import Sales from "./pages/Sales";
 import Returns from "./pages/Returns";
 import Reports from "./pages/Reports";
+import Kardex from "./pages/Kardex";
 
 function RequireAuth() {
   const { token, loading } = useAuth();
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/sales" element={<Sales />} />
             <Route path="/returns" element={<Returns />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/kardex" element={<Kardex />} />
           </Route>
         </Routes>
       </BrowserRouter>

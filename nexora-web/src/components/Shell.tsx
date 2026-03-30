@@ -21,6 +21,7 @@ export default function Shell() {
             <NavLink to="/sales" active={loc.pathname.startsWith("/sales")}>Ventas</NavLink>
             <NavLink to="/returns" active={loc.pathname.startsWith("/returns")}>Devoluciones</NavLink>
             <NavLink to="/customers" active={loc.pathname.startsWith("/customers")}>Clientes</NavLink>
+            <NavLink to="/kardex" active={loc.pathname.startsWith("/kardex")}>Kardex</NavLink>
           </nav>
         </aside>
         <main className="col-span-9">
