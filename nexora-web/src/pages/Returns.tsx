@@ -6,12 +6,12 @@ export default function Returns() {
   const [selected, setSelected] = useState<any>(null);
 
   useEffect(() => {
-    salesApi.list().then(setSales);
+    salesApi.list().then((res:any)=>setSales(res.data));
   }, []);
 
   const load = async (id: number) => {
     const s = await salesApi.get(id);
-    setSelected(s);
+    setSelected(s.data);
   };
 
   const doReturn = async (itemId: number) => {
@@ -23,13 +23,11 @@ export default function Returns() {
     <div className="p-4">
       <h1 className="text-xl font-bold">Devoluciones</h1>
 
-      <div>
-        {sales.map((s) => (
-          <button key={s.id} onClick={() => load(s.id)} className="block border p-2">
-            Venta #{s.id}
-          </button>
-        ))}
-      </div>
+      {sales.map((s) => (
+        <button key={s.id} onClick={() => load(s.id)} className="block border p-2">
+          Venta #{s.id}
+        </button>
+      ))}
 
       {selected && (
         <div>
@@ -37,7 +35,7 @@ export default function Returns() {
           {selected.details.map((d: any) => (
             <div key={d.id}>
               {d.item.name}
-              <button onClick={() => doReturn(d.itemId)}>Devolver 1</button>
+              <button onClick={() => doReturn(d.itemId)}>Devolver</button>
             </div>
           ))}
         </div>

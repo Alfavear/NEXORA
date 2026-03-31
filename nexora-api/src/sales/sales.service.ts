@@ -212,15 +212,33 @@ export class SalesService {
     const totalRevenue = sales.reduce((acc, sale) => acc + Number(sale.total), 0);
 
     const byDayMap = new Map<string, { date: string; total: number; count: number }>();
+    const topProductsMap = new Map<string, { itemId: number; name: string; quantity: number; total: number }>();
+
     for (const sale of sales) {
       const date = sale.createdAt.toISOString().slice(0, 10);
       const current = byDayMap.get(date) ?? { date, total: 0, count: 0 };
       current.total += Number(sale.total);
       current.count += 1;
       byDayMap.set(date, current);
+
+      for (const detail of sale.details) {
+        const key = String(detail.itemId);
+        const itemCurrent = topProductsMap.get(key) ?? {
+          itemId: detail.itemId,
+          name: detail.item?.name ?? `Item ${detail.itemId}`,
+          quantity: 0,
+          total: 0,
+        };
+        itemCurrent.quantity += Number(detail.quantity);
+        itemCurrent.total += Number(detail.subtotal);
+        topProductsMap.set(key, itemCurrent);
+      }
     }
 
     const byDay = Array.from(byDayMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+    const topProducts = Array.from(topProductsMap.values())
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 5);
 
     return {
       filters: { from: from ?? null, to: to ?? null },
@@ -230,6 +248,7 @@ export class SalesService {
         averageTicket: totalSales ? Number((totalRevenue / totalSales).toFixed(2)) : 0,
       },
       byDay,
+      topProducts,
       sales,
     };
   }

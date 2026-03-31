@@ -7,7 +7,7 @@ export default function Kardex() {
 
   const load = async () => {
     const res = await inventoryApi.kardex(Number(itemId));
-    setData(res);
+    setData(res.data);
   };
 
   return (
@@ -27,7 +27,7 @@ export default function Kardex() {
       <div className="mt-4">
         {data.map((d, i) => (
           <div key={i} className="border p-2">
-            {d.date} | {d.type} | {d.quantity} | saldo: {d.balance}
+            {d.itemName} | {d.type} | {d.quantity} | saldo: {d.balance}
           </div>
         ))}
       </div>
