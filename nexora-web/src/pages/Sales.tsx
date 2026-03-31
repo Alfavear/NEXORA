@@ -1,65 +1,53 @@
-import { useEffect, useState } from 'react';
+// improved POS version
+import { useEffect, useMemo, useState } from 'react';
 import { salesApi } from '../api/sales';
 import { itemsApi } from '../api/items';
 import { customersApi } from '../api/customers';
 
 export default function Sales() {
   const [items, setItems] = useState<any[]>([]);
-  const [customers, setCustomers] = useState<any[]>([]);
   const [cart, setCart] = useState<any[]>([]);
-  const [customerId, setCustomerId] = useState<number | undefined>();
-  const [external, setExternal] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    itemsApi.list().then(setItems);
-    customersApi.getAll(true).then(setCustomers);
+    itemsApi.list().then((r:any)=>setItems(r.data ?? r));
   }, []);
 
-  const addItem = (item: any) => {
-    setCart([...cart, { ...item, quantity: 1 }]);
+  const filtered = items.filter((i)=> i.name.toLowerCase().includes(search.toLowerCase()));
+
+  const add = (item:any)=>{
+    const exist = cart.find(c=>c.id===item.id);
+    if(exist){
+      setCart(cart.map(c=>c.id===item.id?{...c,quantity:c.quantity+1}:c));
+    }else{
+      setCart([...cart,{...item,quantity:1}]);
+    }
   };
 
-  const total = cart.reduce((acc, i) => acc + i.quantity * (i.salePrice || i.basePrice || 0), 0);
+  const remove = (id:number)=> setCart(cart.filter(c=>c.id!==id));
 
-  const save = async () => {
-    await salesApi.create({
-      customerId,
-      externalReceiptNumber: external,
-      items: cart.map((i) => ({ itemId: i.id, quantity: i.quantity, unitPrice: i.salePrice || i.basePrice || 0 })),
-    });
-    alert('Venta creada');
-    setCart([]);
-  };
+  const total = cart.reduce((a,c)=>a+(c.quantity*(c.salePrice||c.basePrice||0)),0);
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Ventas</h1>
+      <h1>POS</h1>
+      <input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="buscar" />
 
-      <select onChange={(e) => setCustomerId(Number(e.target.value))} className="border p-2 mb-2">
-        <option>Cliente</option>
-        {customers.map((c) => (
-          <option key={c.id} value={c.id}>{c.name}</option>
-        ))}
-      </select>
-
-      <input placeholder="Consecutivo cliente" value={external} onChange={(e) => setExternal(e.target.value)} className="border p-2 mb-4 w-full" />
-
-      <div className="grid grid-cols-2 gap-2">
-        {items.map((i) => (
-          <button key={i.id} onClick={() => addItem(i)} className="border p-2">
-            {i.name}
-          </button>
+      <div>
+        {filtered.map(i=>(
+          <button key={i.id} onClick={()=>add(i)}>{i.name}</button>
         ))}
       </div>
 
-      <h2 className="mt-4">Carrito</h2>
-      {cart.map((c, idx) => (
-        <div key={idx}>{c.name} x {c.quantity}</div>
+      <h2>Carrito</h2>
+      {cart.map(c=>(
+        <div key={c.id}>
+          {c.name} x {c.quantity}
+          <button onClick={()=>remove(c.id)}>x</button>
+        </div>
       ))}
 
-      <h2>Total: {total}</h2>
-
-      <button onClick={save} className="bg-blue-500 text-white px-4 py-2 mt-2">Guardar</button>
+      <h2>Total {total}</h2>
     </div>
   );
 }
