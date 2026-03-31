@@ -11,12 +11,14 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  
+
+  const corsOrigin = process.env.FRONTEND_URL || '*';
+
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: corsOrigin,
     credentials: true,
   });
-  
-  await app.listen(process.env.PORT ?? 3000);
+
+  await app.listen(process.env.PORT || 10000, '0.0.0.0');
 }
 bootstrap();
