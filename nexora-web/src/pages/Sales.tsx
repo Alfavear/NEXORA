@@ -1,8 +1,6 @@
 // improved POS version
-import { useEffect, useMemo, useState } from 'react';
-import { salesApi } from '../api/sales';
+import { useEffect, useState } from 'react';
 import { itemsApi } from '../api/items';
-import { customersApi } from '../api/customers';
 
 export default function Sales() {
   const [items, setItems] = useState<any[]>([]);

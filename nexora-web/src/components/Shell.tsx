@@ -2,7 +2,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 export default function Shell() {
-  const { me, logout, switchBranch } = useAuth();
+  const { logout } = useAuth();
   const loc = useLocation();
 
   return (

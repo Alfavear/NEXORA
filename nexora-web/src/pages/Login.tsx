@@ -27,7 +27,7 @@ export default function Login() {
 
       // si tiene más de 1 sede, obligamos a escoger
       const count = (me?.branches?.length ?? 0);
-      const hasMany = count > 1;
+
 
       // Nota: me puede tardar un tick, por eso usamos branches memo (y fallback)
       // Si por timing no está aún, igual el siguiente render lo tendrá.
