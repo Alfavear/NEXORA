@@ -23,6 +23,59 @@ export class CreateItemDto {
   description?: string;
 
   @IsOptional()
+  @IsInt()
+  @Min(1)
+  groupId?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  brandId?: number;
+
+  @IsOptional()
+  @IsString()
+  model?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  costPrice?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  salePrice?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  wholesalePrice?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  discountPercent?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  promotionPercent?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  ownerId?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  providerId?: number;
+
+  @IsOptional()
+  @IsString()
+  observations?: string;
+
+  @IsOptional()
   @IsNumber()
   @Min(0)
   basePrice?: number;

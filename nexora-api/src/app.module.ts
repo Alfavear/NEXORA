@@ -10,6 +10,11 @@ import { CategoriesModule } from './categories/categories.module';
 import { ItemsModule } from './items/items.module';
 import { SalesModule } from './sales/sales.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { BranchesModule } from './branches/branches.module';
+import { RolesModule } from './roles/roles.module';
+import { ItemGroupsModule } from './item-groups/item-groups.module';
+import { ItemBrandsModule } from './item-brands/item-brands.module';
+import { ItemOwnersModule } from './item-owners/item-owners.module';
 
 @Module({
   imports: [
@@ -22,6 +27,11 @@ import { InventoryModule } from './inventory/inventory.module';
     ItemsModule,
     SalesModule,
     InventoryModule,
+    BranchesModule,
+    RolesModule,
+    ItemGroupsModule,
+    ItemBrandsModule,
+    ItemOwnersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

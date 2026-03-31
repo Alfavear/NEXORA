@@ -13,12 +13,24 @@ export default function Reports() {
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Reporte de Ventas</h1>
+      <h1 className="text-xl font-bold mb-4 text-slate-100">Reporte de Ventas</h1>
 
-      <div className="flex gap-2 mb-4">
-        <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="border p-2" />
-        <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="border p-2" />
-        <button onClick={load} className="bg-blue-500 text-white px-4">Buscar</button>
+      <div className="flex flex-wrap gap-3 mb-4 items-end">
+        <input
+          type="date"
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+          className="input bg-white text-black border-slate-300 shadow-sm"
+          style={{ color: '#000000' }}
+        />
+        <input
+          type="date"
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+          className="input bg-white text-black border-slate-300 shadow-sm"
+          style={{ color: '#000000' }}
+        />
+        <button onClick={load} className="btn-primary">Buscar</button>
       </div>
 
       {data && (
