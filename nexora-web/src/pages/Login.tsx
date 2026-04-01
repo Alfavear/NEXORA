@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
+import * as AuthAPI from '../api/auth';
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -25,17 +26,16 @@ export default function Login() {
       // ✅ Opción A: login sin branchId
       await login(email, password);
 
-      // si tiene más de 1 sede, obligamos a escoger
-      const count = (me?.branches?.length ?? 0);
+      // obtener datos actualizados inmediatamente
+      const userData = await AuthAPI.me();
+      const meRole = userData.role;
+      const branchCount = userData.branches.length;
 
-
-      // Nota: me puede tardar un tick, por eso usamos branches memo (y fallback)
-      // Si por timing no está aún, igual el siguiente render lo tendrá.
-      if ((branches.length || count) > 1) {
-        setStep("PICK_BRANCH");
-        setSelectedBranchId((branches[0]?.branchId ?? null) as number | null);
+      if (meRole === 'VENDEDOR' || branchCount > 1) {
+        setStep('PICK_BRANCH');
+        setSelectedBranchId((userData.branches[0]?.branchId ?? null) as number | null);
       } else {
-        navigate("/");
+        navigate('/');
       }
     } catch (err: any) {
       setError(err?.response?.data?.message || "Error de autenticación");

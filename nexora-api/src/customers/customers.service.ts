@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -64,7 +68,8 @@ export class CustomersService {
     if (dto.name) updateData.name = dto.name.trim();
     if (dto.document !== undefined) updateData.document = dto.document?.trim();
     if (dto.phone !== undefined) updateData.phone = dto.phone?.trim();
-    if (dto.email !== undefined) updateData.email = dto.email?.trim().toLowerCase();
+    if (dto.email !== undefined)
+      updateData.email = dto.email?.trim().toLowerCase();
     if (dto.address !== undefined) updateData.address = dto.address?.trim();
     if (typeof dto.isActive === 'boolean') updateData.isActive = dto.isActive;
 

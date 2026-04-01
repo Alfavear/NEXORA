@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -31,7 +41,11 @@ export class ItemGroupsController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Patch(':id')
-  update(@Request() req: any, @Param('id') id: string, @Body() dto: UpdateItemGroupDto) {
+  update(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateItemGroupDto,
+  ) {
     return this.service.update(req.user.sub, Number(id), dto);
   }
 

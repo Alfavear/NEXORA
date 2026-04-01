@@ -20,6 +20,7 @@ export default function Maintenance() {
   const [search, setSearch] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [newItem, setNewItem] = useState({
     name: '',
@@ -37,6 +38,7 @@ export default function Maintenance() {
     ownerId: 0,
     providerId: 0,
     observations: '',
+    imageUrl: '',
     categoryId: 0,
     isActive: true,
   });
@@ -75,6 +77,20 @@ export default function Maintenance() {
     return items.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
   }, [items, search]);
 
+  const uploadImageFile = async (file: File) => {
+    setMessage(null);
+    setUploadingImage(true);
+    try {
+      const res = await itemsApi.uploadImage(file);
+      setNewItem((prev) => ({ ...prev, imageUrl: res.data.imageUrl }));
+      setMessage('Imagen cargada exitosamente');
+    } catch (error: any) {
+      setMessage(error?.response?.data?.message || 'Error al subir imagen');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const createItem = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
@@ -96,6 +112,7 @@ export default function Maintenance() {
         ownerId: newItem.ownerId || undefined,
         providerId: newItem.providerId || undefined,
         observations: newItem.observations || undefined,
+        imageUrl: newItem.imageUrl || undefined,
         categoryId: newItem.categoryId || undefined,
         isActive: newItem.isActive,
       });
@@ -115,6 +132,7 @@ export default function Maintenance() {
         ownerId: 0,
         providerId: 0,
         observations: '',
+        imageUrl: '',
         categoryId: 0,
         isActive: true,
       });
@@ -305,6 +323,31 @@ export default function Maintenance() {
                 value={newItem.observations}
                 onChange={(e) => setNewItem((prev) => ({ ...prev, observations: e.target.value }))}
               />
+
+              <label className="block text-sm font-medium text-slate-200">Cargar imagen del artículo</label>
+              <input
+                type="file"
+                accept="image/*"
+                className="input"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  uploadImageFile(file);
+                }}
+              />
+              {uploadingImage && <div className="text-xs text-slate-400">Subiendo imagen...</div>}
+
+              <div className="flex items-center gap-2">
+                <input
+                  className="input"
+                  placeholder="URL de imagen del artículo (opcional)"
+                  value={newItem.imageUrl}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                />
+              </div>
+              {newItem.imageUrl && (
+                <img src={newItem.imageUrl} alt="preview" className="h-24 w-24 object-cover rounded mt-2" />
+              )}
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -357,7 +400,10 @@ export default function Maintenance() {
                         <td>{item.group?.name || item.category?.name || '-'}</td>
                         <td>{item.brand?.name || '-'}</td>
                         <td>{item.model || '-'}</td>
-                        <td>{item.name}</td>
+                        <td className="flex items-center gap-2">
+                          {item.imageUrl && <img src={item.imageUrl} alt="art" className="h-8 w-8 object-cover rounded" />}
+                          {item.name}
+                        </td>
                         <td>{item.sku || '-'}</td>
                         <td>${Number(item.costPrice ?? 0).toFixed(2)}</td>
                         <td>${Number(item.salePrice ?? item.basePrice ?? 0).toFixed(2)}</td>

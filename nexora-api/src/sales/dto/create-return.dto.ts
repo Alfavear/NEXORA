@@ -1,5 +1,14 @@
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsInt, IsNumber, Min, ValidateNested } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsInt,
+  IsNumber,
+  Min,
+  ValidateNested,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 class ReturnItemDto {
   @IsInt()
@@ -9,6 +18,10 @@ class ReturnItemDto {
   @IsNumber()
   @Min(0.01)
   quantity: number;
+
+  @IsOptional()
+  @IsString()
+  reason?: string;
 }
 
 export class CreateReturnDto {

@@ -1,14 +1,14 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Patch, 
-  Delete, 
-  Body, 
-  Param, 
-  Query, 
-  UseGuards, 
-  Request 
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -44,7 +44,11 @@ export class CustomersController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Patch(':id')
-  update(@Request() req: any, @Param('id') id: string, @Body() dto: UpdateCustomerDto) {
+  update(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateCustomerDto,
+  ) {
     return this.service.update(req.user.sub, Number(id), dto);
   }
 

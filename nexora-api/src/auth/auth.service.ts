@@ -54,34 +54,34 @@ export class AuthService {
     const user = await this.validateUser(email, password);
     const roleName = user.role.name as JwtUser['role'];
 
-   // VENDEDOR: branchId opcional en login (Opción A).
-if (roleName === 'VENDEDOR') {
-  let effectiveBranchId: number;
+    // VENDEDOR: branchId opcional en login (Opción A).
+    if (roleName === 'VENDEDOR') {
+      let effectiveBranchId: number;
 
-  if (branchId) {
-    await this.assertBranchAccess(user.id, branchId);
-    effectiveBranchId = branchId;
-  } else {
-    const first = await this.prisma.userBranch.findFirst({
-      where: { userId: user.id, isActive: true },
-      select: { branchId: true },
-      orderBy: { assignedAt: 'asc' },
-    });
+      if (branchId) {
+        await this.assertBranchAccess(user.id, branchId);
+        effectiveBranchId = branchId;
+      } else {
+        const first = await this.prisma.userBranch.findFirst({
+          where: { userId: user.id, isActive: true },
+          select: { branchId: true },
+          orderBy: { assignedAt: 'asc' },
+        });
 
-    if (!first) throw new ForbiddenException('Vendedor sin sedes asignadas');
-    effectiveBranchId = first.branchId; // sede temporal
-  }
+        if (!first)
+          throw new ForbiddenException('Vendedor sin sedes asignadas');
+        effectiveBranchId = first.branchId; // sede temporal
+      }
 
-  const payload = {
-    sub: user.id,
-    email: user.email,
-    role: roleName,
-    branchId: effectiveBranchId,
-  };
+      const payload = {
+        sub: user.id,
+        email: user.email,
+        role: roleName,
+        branchId: effectiveBranchId,
+      };
 
-  return { access_token: this.jwtService.sign(payload) };
-}
-
+      return { access_token: this.jwtService.sign(payload) };
+    }
 
     // ADMIN: branchId opcional
     let effectiveBranchId: number;

@@ -5,6 +5,7 @@ const navItems = [
   { to: "/", label: "Dashboard" },
   { to: "/sales", label: "Ventas" },
   { to: "/returns", label: "Devoluciones" },
+  { to: "/adjustments", label: "Ajustes" },
   { to: "/reports", label: "Reportes" },
   { to: "/kardex", label: "Kardex" },
   { to: "/maintenance", label: "Mantenimiento" },
@@ -16,10 +17,13 @@ const masterItems = [
   { to: "/customers", label: "Clientes" },
   { to: "/roles", label: "Roles" },
   { to: "/branches", label: "Sucursales" },
+  { to: "/item-groups", label: "Grupos" },
+  { to: "/item-brands", label: "Marcas" },
+  { to: "/item-owners", label: "Propietarios" },
 ];
 
 export default function Shell() {
-  const { me, logout } = useAuth();
+  const { me, logout, switchBranch } = useAuth();
   const loc = useLocation();
 
   return (
@@ -78,12 +82,29 @@ export default function Shell() {
           <div className="text-sm text-slate-200">
             Bienvenido, <span className="font-semibold text-white">{me?.name}</span>
           </div>
-          <button
-            onClick={logout}
-            className="btn btn-danger py-2 px-4"
-          >
-            Salir
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-300">Sede:</span>
+            <select
+              className="input input-sm bg-slate-900 text-white border-slate-700"
+              value={me?.branchId ?? ''}
+              onChange={async (e) => {
+                const bid = Number(e.target.value);
+                if (!isNaN(bid) && bid > 0) {
+                  await switchBranch(bid);
+                }
+              }}
+            >
+              {me?.branches?.map((b) => (
+                <option key={b.branchId} value={b.branchId}>{b.name}</option>
+              ))}
+            </select>
+            <button
+              onClick={logout}
+              className="btn btn-danger py-2 px-4"
+            >
+              Salir
+            </button>
+          </div>
         </header>
 
         {/* CONTENT */}

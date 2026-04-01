@@ -44,3 +44,13 @@ Fecha: 30 marzo 2026
 - `nexora-api/prisma/schema.prisma`
 - `nexora-api/src/items/items.service.ts`
 - `nexora-web/src/pages/Maintenance.tsx`
+
+## Avance del 31 marzo 2026
+- Se implementó `SalePayment` en prisma y enlace en `Sale`.
+- Se habilitaron endpoints nuevos en `SalesController`: `GET /sales/credits`, `POST /sales/:id/payments`, `GET /sales/:id/payments`.
+- Se agregaron validaciones y calc. de status en `SalesService` para crédito, parcial, pago y saldo.
+- UI de ventas (`Sales.tsx`) ahora soporta ventas crédito con `dueDate`, `initialPayment`, historial de cartera, abonos y `print invoice`.
+- Se agregó reporte de cartera avanzada (`GET /sales/credits/report`) con filtros `from`, `to`, `customerId`, `branchId`, `status`.
+- En `Reports.tsx`: se modularizó la sección de reportes en tipos (Ventas/Cartera), con filtros, grilla, procesar e imprimir visualizador.
+- En `Shell.tsx`: se añadió selector de sedes activo con cambio de sede en caliente (switchBranch) sin cerrar sesión.
+- En `Login.tsx`: ahora un vendedor debe escoger sede obligatoriamente antes de entrar al app.

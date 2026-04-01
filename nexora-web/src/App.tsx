@@ -13,6 +13,10 @@ import Kardex from "./pages/Kardex";
 import Branches from "./pages/Branches";
 import Roles from "./pages/Roles";
 import Maintenance from "./pages/Maintenance";
+import ItemGroups from "./pages/ItemGroups";
+import ItemBrands from "./pages/ItemBrands";
+import ItemOwners from "./pages/ItemOwners";
+import Adjustments from "./pages/Adjustments";
 
 function RequireAuth() {
   const { token, loading } = useAuth();
@@ -35,10 +39,14 @@ export default function App() {
             <Route path="/customers" element={<Customers />} />
             <Route path="/sales" element={<Sales />} />
             <Route path="/returns" element={<Returns />} />
+            <Route path="/adjustments" element={<Adjustments />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/kardex" element={<Kardex />} />
             <Route path="/branches" element={<Branches />} />
             <Route path="/roles" element={<Roles />} />
+            <Route path="/item-groups" element={<ItemGroups />} />
+            <Route path="/item-brands" element={<ItemBrands />} />
+            <Route path="/item-owners" element={<ItemOwners />} />
             <Route path="/maintenance" element={<Maintenance />} />
           </Route>
         </Routes>

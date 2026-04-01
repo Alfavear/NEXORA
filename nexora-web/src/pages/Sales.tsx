@@ -17,8 +17,15 @@ export default function Sales() {
   const [externalReceipt, setExternalReceipt] = useState('');
   const [notes, setNotes] = useState('');
   const [saleType, setSaleType] = useState<'CONTADO' | 'CRÉDITO'>('CONTADO');
+  const [dueDate, setDueDate] = useState('');
+  const [initialPayment, setInitialPayment] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [transport, setTransport] = useState(0);
+  const [selectedCreditSaleId, setSelectedCreditSaleId] = useState<number | null>(null);
+  const [selectedCreditSale, setSelectedCreditSale] = useState<any>(null);
+  const [paymentAmount, setPaymentAmount] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState('Efectivo');
+  const [paymentNotes, setPaymentNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -33,6 +40,11 @@ export default function Sales() {
     [items, search],
   );
 
+  const outstandingSales = useMemo(
+    () => sales.filter((sale) => Number(sale.outstanding) > 0),
+    [sales],
+  );
+
   const addToCart = (item: any) => {
     setCart((prev) => {
       const existing = prev.find((c) => c.itemId === item.id);
@@ -41,7 +53,8 @@ export default function Sales() {
           c.itemId === item.id ? { ...c, quantity: c.quantity + 1 } : c,
         );
       }
-      return [...prev, { itemId: item.id, name: item.name, quantity: 1, unitPrice: Number(item.salePrice ?? item.basePrice ?? 0) }];
+      const price = Number(item.salePrice ?? item.basePrice ?? 0);
+      return [...prev, { itemId: item.id, name: item.name, quantity: 1, baseUnitPrice: price, unitPrice: price, isGift: false }];
     });
   };
 
@@ -112,6 +125,8 @@ export default function Sales() {
     setExternalReceipt('');
     setNotes('');
     setSaleType('CONTADO');
+    setDueDate('');
+    setInitialPayment(0);
     setDiscount(0);
     setTransport(0);
     setMessage(null);
@@ -133,11 +148,20 @@ export default function Sales() {
     }
 
     try {
+      if (saleType === 'CRÉDITO' && !dueDate) {
+        setMessage('Selecciona una fecha de vencimiento para crédito');
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         customerId: selectedCustomer || undefined,
         externalReceiptNumber: externalReceipt || undefined,
         notes: `${notes || ''} | Tipo: ${saleType} | Desc: ${discount.toFixed(2)} | IVA: ${tax.toFixed(2)} | Transp: ${transport.toFixed(2)}`,
-        items: cart.map((i) => ({ itemId: i.itemId, quantity: i.quantity, unitPrice: i.unitPrice })),
+        isCredit: saleType === 'CRÉDITO',
+        dueDate: saleType === 'CRÉDITO' ? dueDate : undefined,
+        initialPayment: saleType === 'CRÉDITO' ? initialPayment : 0,
+        items: cart.map((i) => ({ itemId: i.itemId, quantity: i.quantity, unitPrice: i.isGift ? 0 : i.baseUnitPrice, isGift: i.isGift ?? false })),
         subtotal,
         total,
       };
@@ -149,6 +173,9 @@ export default function Sales() {
       setNotes('');
       setExternalReceipt('');
       setSelectedCustomer(null);
+      setSaleType('CONTADO');
+      setDueDate('');
+      setInitialPayment(0);
 
       // Actualizar lista de ventas y stocks
       const updatedSales = await salesApi.list();
@@ -158,6 +185,76 @@ export default function Sales() {
       setItems(updatedItems.data ?? updatedItems);
     } catch (error: any) {
       setMessage(error?.response?.data?.message || 'No se pudo crear la venta.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCreditSale = async (saleId: number) => {
+    try {
+      const res = await salesApi.get(saleId);
+      setSelectedCreditSale(res.data ?? res);
+      setMessage(null);
+    } catch (error: any) {
+      setMessage(error?.response?.data?.message || 'No se pudo cargar la venta');
+    }
+  };
+
+  const printSale = (sale: any) => {
+    const html = `
+      <h1>Factura: ${sale.systemNumber}</h1>
+      <p>Cliente: ${sale.customer?.name ?? 'Genérico'}</p>
+      <p>Fecha: ${new Date(sale.createdAt).toLocaleString()}</p>
+      <p>Total: ${Number(sale.total).toFixed(2)}</p>
+      <p>Pagado: ${Number(sale.paidAmount).toFixed(2)}</p>
+      <p>Saldo: ${Number(sale.outstanding).toFixed(2)}</p>
+      <p>Estado: ${sale.paymentStatus}</p>
+      <h2>Detalles</h2>
+      <table border="1" cellspacing="0" cellpadding="4" width="100%">
+        <thead><tr><th>Item</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+        <tbody>
+          ${sale.details?.map((d: any) => `<tr><td>${d.item?.name ?? '-'} </td><td>${d.quantity}</td><td>${Number(d.unitPrice).toFixed(2)}</td><td>${Number(d.subtotal).toFixed(2)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<html><body>${html}</body></html>`);
+    win.document.close();
+    win.print();
+  };
+
+  const submitPayment = async () => {
+    if (!selectedCreditSaleId) {
+      setMessage('Selecciona una venta a crédito');
+      return;
+    }
+    if (paymentAmount <= 0) {
+      setMessage('Ingresa un monto válido para abonar');
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      await salesApi.createPayment(selectedCreditSaleId, {
+        amount: paymentAmount,
+        method: paymentMethod,
+        notes: paymentNotes,
+      });
+
+      setMessage('Abono registrado correctamente');
+      setPaymentAmount(0);
+      setPaymentNotes('');
+
+      const updatedSales = await salesApi.list();
+      setSales(updatedSales.data ?? updatedSales);
+      if (selectedCreditSaleId) {
+        await loadCreditSale(selectedCreditSaleId);
+      }
+    } catch (error: any) {
+      setMessage(error?.response?.data?.message || 'No se pudo registrar el abono.');
     } finally {
       setLoading(false);
     }
@@ -218,6 +315,30 @@ export default function Sales() {
               <option value="CRÉDITO">Crédito</option>
             </select>
           </label>
+
+          {saleType === 'CRÉDITO' && (
+            <>
+              <label className="block mb-2">
+                Fecha de vencimiento
+                <input
+                  type="date"
+                  className="input mt-1"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                />
+              </label>
+              <label className="block mb-2">
+                Pago inicial
+                <input
+                  type="number"
+                  min={0}
+                  className="input mt-1"
+                  value={initialPayment}
+                  onChange={(e) => setInitialPayment(Number(e.target.value) || 0)}
+                />
+              </label>
+            </>
+          )}
 
           <label className="block mb-2">
             Descuento
@@ -335,6 +456,21 @@ export default function Sales() {
                     <div className="flex-1">
                       <div className="font-medium text-white">{item.name}</div>
                       <div className="text-xs text-slate-300">Precio unitario: ${Number(item.unitPrice).toFixed(2)}</div>
+                      <label className="text-xs text-slate-300 inline-flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={item.isGift ?? false}
+                          onChange={(e) => {
+                            const gift = e.target.checked;
+                            setCart((prev) =>
+                              prev.map((c) =>
+                                c.itemId === item.itemId ? { ...c, isGift: gift, unitPrice: gift ? 0 : c.unitPrice } : c,
+                              ),
+                            );
+                          }}
+                        />
+                        Regalo (cero valor)
+                      </label>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
@@ -399,6 +535,105 @@ export default function Sales() {
               </div>
             ))
           )}
+        </div>
+      </div>
+
+      <div className="card p-4">
+        <h2 className="text-xl font-semibold mb-3">Cartera de Clientes</h2>
+        <p className="text-sm text-slate-400 mb-3">Ventas con deuda pendiente (créditos)</p>
+
+        <div className="space-y-2 mb-4">
+          {outstandingSales.length === 0 ? (
+            <div className="text-slate-300">No hay deudas pendientes.</div>
+          ) : (
+            outstandingSales.map((sale) => (
+              <div key={sale.id} className="rounded-lg border border-amber-500 p-3 bg-slate-900/60">
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <div className="text-sm text-slate-300">#{sale.systemNumber} - {new Date(sale.dueDate).toLocaleDateString()}</div>
+                    <div className="text-white font-semibold">Total: ${Number(sale.total).toFixed(2)}</div>
+                    <div className="text-xs text-amber-200">Saldo: ${Number(sale.outstanding).toFixed(2)}</div>
+                    <div className="text-xs text-slate-400">Cliente: {sale.customer?.name ?? 'Genérico'}</div>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      className="btn-soft px-2 text-xs"
+                      onClick={() => {
+                        setSelectedCreditSaleId(sale.id);
+                        loadCreditSale(sale.id);
+                      }}
+                    >
+                      Ver
+                    </button>
+                    <button
+                      className="btn-soft px-2 text-xs"
+                      onClick={() => {
+                        printSale(sale);
+                      }}
+                    >
+                      Imprimir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {selectedCreditSale && (
+          <div className="rounded-xl border border-cyan-500 p-3 bg-slate-900/40 mt-3">
+            <h3 className="font-semibold text-cyan-200">Venta seleccionada</h3>
+            <p>Sistema: {selectedCreditSale.systemNumber}</p>
+            <p>Cliente: {selectedCreditSale.customer?.name ?? 'Genérico'}</p>
+            <p>Total: ${Number(selectedCreditSale.total).toFixed(2)}</p>
+            <p>Pagado: ${Number(selectedCreditSale.paidAmount).toFixed(2)}</p>
+            <p>Saldo: ${Number(selectedCreditSale.outstanding).toFixed(2)}</p>
+            <p>Estado: {selectedCreditSale.paymentStatus}</p>
+
+            <h4 className="mt-2 text-sm text-white">Historial de pagos</h4>
+            <div className="space-y-1 text-sm text-slate-200">
+              {selectedCreditSale.payments?.length ? (
+                selectedCreditSale.payments.map((p: any) => (
+                  <div key={p.id} className="border border-slate-600 rounded p-2 bg-slate-800/50">
+                    <div>{new Date(p.createdAt).toLocaleString()}</div>
+                    <div>Monto: ${Number(p.amount).toFixed(2)} / {p.method}</div>
+                    <div>Nota: {p.notes || '-'}</div>
+                  </div>
+                ))
+              ) : (
+                <div>No hay pagos registrados.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 items-end">
+          <label className="block">
+            Seleccionar venta
+            <select className="input mt-1 bg-white text-black" value={selectedCreditSaleId ?? ''} onChange={(e) => setSelectedCreditSaleId(Number(e.target.value) || null)}>
+              <option value="">Seleccione</option>
+              {outstandingSales.map((sale) => (
+                <option key={sale.id} value={sale.id}>
+                  {sale.systemNumber} - ${Number(sale.outstanding).toFixed(2)} - {sale.customer?.name ?? 'Genérico'}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            Monto abonado
+            <input type="number" min={0} className="input mt-1" value={paymentAmount} onChange={(e) => setPaymentAmount(Number(e.target.value) || 0)} />
+          </label>
+          <label className="block">
+            Método
+            <input className="input mt-1" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} />
+          </label>
+          <label className="block md:col-span-2">
+            Notas
+            <input className="input mt-1" value={paymentNotes} onChange={(e) => setPaymentNotes(e.target.value)} />
+          </label>
+          <button className="btn-primary md:col-span-2" onClick={submitPayment} disabled={loading}>
+            Registrar abono
+          </button>
         </div>
       </div>
     </div>

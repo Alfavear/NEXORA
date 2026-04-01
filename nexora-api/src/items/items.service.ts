@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -63,7 +67,8 @@ export class ItemsService {
     if (dto.groupId) await this.assertGroupInCompany(companyId, dto.groupId);
     if (dto.brandId) await this.assertBrandInCompany(companyId, dto.brandId);
     if (dto.ownerId) await this.assertOwnerInCompany(companyId, dto.ownerId);
-    if (dto.providerId) await this.assertProviderInCompany(companyId, dto.providerId);
+    if (dto.providerId)
+      await this.assertProviderInCompany(companyId, dto.providerId);
 
     const name = dto.name.trim();
     const sku = dto.sku?.trim() || null;
@@ -89,6 +94,7 @@ export class ItemsService {
           ownerId: dto.ownerId || null,
           providerId: dto.providerId || null,
           observations: dto.observations?.trim() ?? null,
+          imageUrl: dto.imageUrl?.trim() || null,
         },
         include: { category: { select: { id: true, name: true } } },
       });
@@ -97,7 +103,15 @@ export class ItemsService {
     }
   }
 
-  async findAll(userId: number, query: { q?: string; categoryId?: number; type?: string; isActive?: boolean }) {
+  async findAll(
+    userId: number,
+    query: {
+      q?: string;
+      categoryId?: number;
+      type?: string;
+      isActive?: boolean;
+    },
+  ) {
     const companyId = await this.getCompanyIdByUser(userId);
 
     return this.prisma.item.findMany({
@@ -105,7 +119,9 @@ export class ItemsService {
         companyId,
         ...(query.categoryId ? { categoryId: query.categoryId } : {}),
         ...(query.type ? { type: query.type as any } : {}),
-        ...(typeof query.isActive === 'boolean' ? { isActive: query.isActive } : {}),
+        ...(typeof query.isActive === 'boolean'
+          ? { isActive: query.isActive }
+          : {}),
         ...(query.q
           ? {
               OR: [
@@ -143,17 +159,20 @@ export class ItemsService {
 
     await this.findOne(userId, id);
 
-    if (dto.categoryId) await this.assertCategoryInCompany(companyId, dto.categoryId);
+    if (dto.categoryId)
+      await this.assertCategoryInCompany(companyId, dto.categoryId);
     if (dto.groupId) await this.assertGroupInCompany(companyId, dto.groupId);
     if (dto.brandId) await this.assertBrandInCompany(companyId, dto.brandId);
     if (dto.ownerId) await this.assertOwnerInCompany(companyId, dto.ownerId);
-    if (dto.providerId) await this.assertProviderInCompany(companyId, dto.providerId);
+    if (dto.providerId)
+      await this.assertProviderInCompany(companyId, dto.providerId);
 
     const data: any = {};
     if (dto.name) data.name = dto.name.trim();
     if (dto.sku !== undefined) data.sku = dto.sku?.trim() || null;
     if (dto.type) data.type = dto.type as any;
-    if (dto.description !== undefined) data.description = dto.description?.trim() || null;
+    if (dto.description !== undefined)
+      data.description = dto.description?.trim() || null;
     if (dto.basePrice !== undefined) data.basePrice = dto.basePrice ?? null;
     if (dto.categoryId) data.categoryId = dto.categoryId;
     if (typeof dto.isActive === 'boolean') data.isActive = dto.isActive;
@@ -162,12 +181,18 @@ export class ItemsService {
     if (dto.model !== undefined) data.model = dto.model?.trim() || null;
     if (dto.costPrice !== undefined) data.costPrice = dto.costPrice ?? null;
     if (dto.salePrice !== undefined) data.salePrice = dto.salePrice ?? null;
-    if (dto.wholesalePrice !== undefined) data.wholesalePrice = dto.wholesalePrice ?? null;
-    if (dto.discountPercent !== undefined) data.discountPercent = dto.discountPercent ?? null;
-    if (dto.promotionPercent !== undefined) data.promotionPercent = dto.promotionPercent ?? null;
+    if (dto.wholesalePrice !== undefined)
+      data.wholesalePrice = dto.wholesalePrice ?? null;
+    if (dto.discountPercent !== undefined)
+      data.discountPercent = dto.discountPercent ?? null;
+    if (dto.promotionPercent !== undefined)
+      data.promotionPercent = dto.promotionPercent ?? null;
     if (dto.ownerId !== undefined) data.ownerId = dto.ownerId || null;
     if (dto.providerId !== undefined) data.providerId = dto.providerId || null;
-    if (dto.observations !== undefined) data.observations = dto.observations?.trim() || null;
+    if (dto.observations !== undefined)
+      data.observations = dto.observations?.trim() || null;
+    if (dto.imageUrl !== undefined)
+      data.imageUrl = dto.imageUrl?.trim() || null;
 
     try {
       return await this.prisma.item.update({
