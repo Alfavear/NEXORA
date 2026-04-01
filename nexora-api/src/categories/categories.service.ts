@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -63,11 +67,15 @@ export class CategoriesService {
         where: { id },
         data: {
           ...(dto.name ? { name: dto.name } : {}),
-          ...(typeof dto.isActive === 'boolean' ? { isActive: dto.isActive } : {}),
+          ...(typeof dto.isActive === 'boolean'
+            ? { isActive: dto.isActive }
+            : {}),
         },
       });
     } catch {
-      throw new BadRequestException('No se pudo actualizar (nombre duplicado?)');
+      throw new BadRequestException(
+        'No se pudo actualizar (nombre duplicado?)',
+      );
     }
   }
 

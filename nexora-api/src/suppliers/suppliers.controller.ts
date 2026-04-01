@@ -1,14 +1,14 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Patch, 
-  Delete, 
-  Body, 
-  Param, 
-  Query, 
-  UseGuards, 
-  Request 
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { SuppliersService } from './suppliers.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -46,7 +46,11 @@ export class SuppliersController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Patch(':id')
-  update(@Request() req: any, @Param('id') id: string, @Body() dto: UpdateSupplierDto) {
+  update(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateSupplierDto,
+  ) {
     return this.service.update(req.user.sub, Number(id), dto);
   }
 

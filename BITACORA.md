@@ -54,6 +54,7 @@ Fecha: 30 marzo 2026
 - En `Reports.tsx`: se modularizó la sección de reportes en tipos (Ventas/Cartera), con filtros, grilla, procesar e imprimir visualizador.
 - En `Shell.tsx`: se añadió selector de sedes activo con cambio de sede en caliente (switchBranch) sin cerrar sesión.
 - En `Login.tsx`: ahora un vendedor debe escoger sede obligatoriamente antes de entrar al app.
+<<<<<<< HEAD
 
 pendientes 
 
@@ -332,3 +333,5 @@ Empieza por:
 4. trabajar sobre `feature-finance-foundation`
 
 Si detectas algo importante que pueda romper compatibilidad con `main`, dilo antes de implementar.
+=======
+>>>>>>> origin/ai-polish-final

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { customersApi } from '../api/customers';
-import type { Customer, CreateCustomerDto, UpdateCustomerDto } from '../api/customers';
+import type { Customer, CreateCustomerDto } from '../api/customers';
 
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
