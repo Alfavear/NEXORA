@@ -258,7 +258,40 @@ model SaleDetail {
   returnDetails SaleReturnDetail[]
 
   @@index([saleId])
+<<<<<<< Updated upstream
   @@index([itemId])
+=======
+}
+
+model SalePayment {
+  id              Int      @id @default(autoincrement())
+  saleId          Int
+  paymentMethodId Int
+  amount          Decimal  @db.Decimal(12, 2)
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  sale          Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@index([saleId])
+  @@index([paymentMethodId])
+}
+
+model PaymentMethod {
+  id        Int      @id @default(autoincrement())
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId Int
+
+  salesPayments SalePayment[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+>>>>>>> Stashed changes
 }
 
 model SaleReturn {

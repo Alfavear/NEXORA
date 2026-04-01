@@ -1,0 +1,88 @@
+"idereg","tiptran","fechfa","codart","nomart","codori","numnot","cantid","pcosto","pventa","can_ven","cos_ven","venta"
+"1",CL,2009-05-04 00:00:00.000,DW-025,Radiador lanos I-II/03 (sin aire) / hcc,6,46.0,10,41.23,115.89,0.0,0.0,10.0
+"1",CL,2009-05-04 00:00:00.000,DW-059,Radiador racer cielo / hcc,6,46.0,40,42.31,111.92,0.0,0.0,10.0
+"1",CL,2009-05-04 00:00:00.000,DW-069,"Radiador aveo, chevitaxi 1.5 hcc",6,46.0,10,39.91,101.77,0.0,0.0,10.0
+"1",CL,2009-05-04 00:00:00.000,HY-004,Filtro aire verna/04 atoz/03 onnuri,6,46.0,100,1.31,3.9,0.0,0.0,100.0
+"1",CL,2009-05-04 00:00:00.000,HY-053,Bomba gasolina exc/94-ela/93 mobis,6,46.0,20,17.07,43.53,0.0,0.0,20.0
+"1",CL,2009-05-04 00:00:00.000,HY-054,Manzana rda. dela. ver/04 ato/03 alterna,6,46.0,10,12.09,66.83,0.0,0.0,10.0
+"1",CL,2009-05-04 00:00:00.000,HY-061,Terminal barra est. der. ver/04 mobis,6,46.0,150,4.87,12.81,0.0,0.0,150.0
+"1",CL,2009-05-04 00:00:00.000,HY-063,Terminal barra est. izq. ver/04 mobis,6,46.0,200,4.87,12.81,0.0,0.0,200.0
+"1",CL,2009-05-04 00:00:00.000,HY-066,Radiador verna 04 peq./ hcc,6,46.0,80,26.96,75.73,0.0,0.0,88.0
+"1",CL,2009-05-04 00:00:00.000,HY-068,Base motor dela. verna 2003/1.6 mobis,6,46.0,50,7.94,21.4,0.0,0.0,37.0
+"1",CL,2009-05-04 00:00:00.000,HY-077,Malla bomba gasolina verna mobis,6,46.0,534,1.44,3.67,0.0,0.0,561.0
+"1",CL,2009-05-04 00:00:00.000,HY-092,Banda dist. 101 dtes atos mobis,6,46.0,100,9.64,26.27,0.0,0.0,54.0
+"1",CL,2009-05-04 00:00:00.000,HY-097,Radiador verna grande mobis,6,46.0,5,62.73,159.96,0.0,0.0,7.0
+"1",CL,2009-05-04 00:00:00.000,HY-103,Ruliman embrague atos mobis,6,46.0,28,7.45,19.0,0.0,0.0,21.0
+"1",CL,2009-05-04 00:00:00.000,HY-107,Rotula suspension accent  mobis,6,46.0,70,5.63,14.36,0.0,0.0,0.0
+"1",CL,2009-05-04 00:00:00.000,HY-109,Base amortiguador dela. accent verna/mobis,6,46.0,200,7.61,20.04,0.0,0.0,200.0
+"1",CL,2009-05-04 00:00:00.000,HY-110,Buje mesa dela. izq. caucho accent 95/99/onnuri,6,46.0,100,1.43,3.65,0.0,0.0,36.0
+"1",CL,2009-05-04 00:00:00.000,HY-112,Buje plato suspension atos mobis,6,46.0,41,1.85,4.72,0.0,0.0,47.0
+"1",CL,2009-05-04 00:00:00.000,HY-118,Bocin caja direccion accent alto/ mobis,6,46.0,5,1.68,4.63,0.0,0.0,5.0
+"1",CL,2009-05-04 00:00:00.000,HY-123,Valvula admision verna mobis,6,46.0,1033,1.85,4.72,0.0,0.0,1164.0
+"1",CL,2009-05-04 00:00:00.000,HY-124,Valvula escape verna mobis,6,46.0,949,2.2,5.61,0.0,0.0,832.0
+"1",CL,2009-05-04 00:00:00.000,HY-126,Caucho barra estab. post. verna/mobis,6,46.0,768,0.47,1.2,0.0,0.0,348.0
+"1",CL,2009-05-04 00:00:00.000,HY-127,Enganche barra estab. post. verna/mobis,6,46.0,100,2.43,6.71,0.0,0.0,195.0
+"1",CL,2009-05-04 00:00:00.000,HY-132,Reten semi eje excel/alterno pos,6,46.0,599,0.72,1.84,0.0,0.0,0.0
+"1",CL,2009-05-04 00:00:00.000,HY-159,Barra limpiaparabrisas accent verna/mobis,6,46.0,199,5.29,13.49,0.0,0.0,30.0
+"1",CL,2009-05-04 00:00:00.000,HY-164,Cable embrague excel/mobis,6,46.0,18,4.18,10.66,0.0,0.0,18.0
+"1",CL,2009-05-04 00:00:00.000,HY-170,Articulaci�n verna 99-05/mobis,6,46.0,60,4.87,12.62,0.0,0.0,70.0
+"1",CL,2009-05-04 00:00:00.000,HY-173,Base motor posterior verna 1.6 /mobis,6,46.0,20,7.2,18.42,0.0,0.0,27.0
+"1",CL,2009-05-04 00:00:00.000,HY-174,V�lvula escape accent 1.5/mobis,6,46.0,376,2.37,6.04,0.0,0.0,258.0
+"1",CL,2009-05-04 00:00:00.000,HY-178,Tapa radiador verna/mobis,6,46.0,419,2.35,5.99,0.0,0.0,429.0
+"1",CL,2009-05-04 00:00:00.000,HY-180,Trompo retro verna/mobis,6,46.0,200,3.05,8.43,0.0,0.0,205.0
+"1",CL,2009-05-04 00:00:00.000,HY-188,Buje mesa suspensi�n grande.dela.verna/mobis,6,46.0,763,1.94,4.95,0.0,0.0,763.0
+"1",CL,2009-05-04 00:00:00.000,HY-195,Ret�n cigue�al post. accent verna/mobis,6,46.0,652,4.03,10.28,0.0,0.0,269.0
+"1",CL,2009-05-04 00:00:00.000,HY-200,Empaque cabezote new verna 07/mobis,6,46.0,84,7.72,19.69,0.0,0.0,84.0
+"1",CL,2009-05-04 00:00:00.000,HY-202,Tapa v�lvula verna/mobis,6,46.0,6,23.68,60.38,0.0,0.0,24.0
+"1",CL,2009-05-04 00:00:00.000,HY-203,Empaque tapa v�lvula getz verna/mobis,6,46.0,894,3.55,9.05,0.0,0.0,339.0
+"1",CL,2009-05-04 00:00:00.000,HY-204,Rines std. verna matrix doch 1.6/mobis,6,46.0,22,26.84,68.44,0.0,0.0,14.0
+"1",CL,2009-05-04 00:00:00.000,HY-208,Pistones std unid verna getz/matrix doch 06/1.6/mb,6,46.0,20,5.96,15.2,0.0,0.0,20.0
+"1",CL,2009-05-04 00:00:00.000,HY-209,Pistones std jgo. verna 1.5/75.5 /mobis,6,46.0,69,5.8,59.16,0.0,0.0,50.0
+"1",CL,2009-05-04 00:00:00.000,HY-214,Motor electroventilador comp. verna/mobis,6,46.0,11,38.12,97.21,0.0,0.0,11.0
+"1",CL,2009-05-04 00:00:00.000,HY-216,Manguera radiador superior verna/mobis,6,46.0,85,2.35,5.99,0.0,0.0,85.0
+"1",CL,2009-05-04 00:00:00.000,HY-217,Manguera by pass corta verna/mobis,6,46.0,90,1.23,3.14,0.0,0.0,90.0
+"1",CL,2009-05-04 00:00:00.000,HY-218,Tapa termostato doble verna/mobis,6,46.0,128,2.35,5.99,0.0,0.0,57.0
+"1",CL,2009-05-04 00:00:00.000,HY-219,Toma/ducto agua largo atoz/mobis,6,46.0,115,7.02,17.9,0.0,0.0,23.0
+"1",CL,2009-05-04 00:00:00.000,HY-227,Canister verna /mobis,6,46.0,7,10.32,26.32,0.0,0.0,10.0
+"1",CL,2009-05-04 00:00:00.000,HY-228,Actuador velocidad atoz/mobis,6,46.0,17,23.87,60.87,0.0,0.0,6.0
+"1",CL,2009-05-04 00:00:00.000,HY-231,Horquilla embrague verna99-05/mobis,6,46.0,57,2.75,7.01,0.0,0.0,77.0
+"1",CL,2009-05-04 00:00:00.000,HY-232,Horquilla embrague new accent verna 06/mobis,6,46.0,113,2.75,7.01,0.0,0.0,54.0
+"1",CL,2009-05-04 00:00:00.000,HY-233,Cilindro principal embrague getz/mobis,6,46.0,55,10.67,29.47,0.0,0.0,55.0
+"1",CL,2009-05-04 00:00:00.000,HY-236,Base palanca cambio atoz/mobis,6,46.0,853,1.81,4.62,0.0,0.0,117.0
+"1",CL,2009-05-04 00:00:00.000,HY-238,Guardapolvo homocin�tica todos hy. /mobis,6,46.0,50,1.44,3.67,0.0,0.0,50.0
+"1",CL,2009-05-04 00:00:00.000,HY-240,Rotula superior new accent 06/mobis,6,46.0,100,6.76,18.67,0.0,0.0,115.0
+"1",CL,2009-05-04 00:00:00.000,HY-242,Manzana rda. post. atoz alterna/x2hub,6,46.0,30,15.17,42.58,0.0,0.0,30.0
+"1",CL,2009-05-04 00:00:00.000,HY-246,Perno regulador mesa post.verna/mobis,6,46.0,447,0.64,1.63,0.0,0.0,139.0
+"1",CL,2009-05-04 00:00:00.000,HY-248,Espiral post. accent 98/mobis,6,46.0,40,7.89,21.81,0.0,0.0,40.0
+"1",CL,2009-05-04 00:00:00.000,HY-249,Espiral post.verna 99-05/mobis,6,46.0,182,10.24,26.11,0.0,0.0,182.0
+"1",CL,2009-05-04 00:00:00.000,HY-253,Bocin puente post. gra. atoz /onnuri,6,46.0,200,1.65,4.21,0.0,0.0,19.0
+"1",CL,2009-05-04 00:00:00.000,HY-256,Articulaci�n direcci�n getz/mobis,6,46.0,40,11.17,30.85,0.0,0.0,26.0
+"1",CL,2009-05-04 00:00:00.000,HY-260,Reparaci�n cilindro maestro freno verna99-05/mobis,6,46.0,100,4.19,11.59,0.0,0.0,101.0
+"1",CL,2009-05-04 00:00:00.000,HY-261,Bomba freno verna 99-05/mobis,6,46.0,30,29.69,82.0,0.0,0.0,13.0
+"1",CL,2009-05-04 00:00:00.000,HY-269,Cilindro auxiliar embrague accet verna getz 1.6/mb,6,46.0,5,6.6,24.17,0.0,0.0,24.0
+"1",CL,2009-05-04 00:00:00.000,HY-286,Punta eje ara�a dela. der.verna mobis,6,46.0,3,24.69,62.96,0.0,0.0,6.0
+"1",CL,2009-05-04 00:00:00.000,HY-287,Punta eje ara�a dela. izq. verna mobis,6,46.0,13,24.69,62.96,0.0,0.0,4.0
+"1",CL,2009-05-04 00:00:00.000,HY-291,Ret�n cigue�al dela. verna,6,46.0,99,1.81,4.62,0.0,0.0,99.0
+"1",CL,2009-05-04 00:00:00.000,HY-295,Pi��n cigue�al atos mobis,6,46.0,1,2.0,5.1,0.0,0.0,1.0
+"1",CL,2009-05-04 00:00:00.000,HY-296,Tapa depurador susp. new accent mobis,6,46.0,16,3.92,10.0,0.0,0.0,8.0
+"1",CL,2009-05-04 00:00:00.000,HY-300,"Disco embrague 1.6 verna, mobis",6,46.0,10,27.55,70.25,0.0,0.0,10.0
+"1",CL,2009-05-04 00:00:00.000,HY-301,"Terminal estab.izq. new accent, mobis",6,46.0,20,5.2,13.26,0.0,0.0,20.0
+"1",CL,2009-05-04 00:00:00.000,HY-302,"Terminal estab.der. new accent, mobis",6,46.0,60,5.2,13.26,0.0,0.0,60.0
+"1",CL,2009-05-04 00:00:00.000,KI-033,Jgo. cable bujia kia rio /03 onnuri,6,46.0,50,15.87,40.47,0.0,0.0,0.0
+"1",CL,2009-05-04 00:00:00.000,KI-034,Radiador kia rio/03 hcc,6,46.0,10,37.27,113.32000000000001,0.0,0.0,5.0
+"1",CL,2009-05-04 00:00:00.000,KI-035,Disco freno kia rio I 2002 /kgc,6,46.0,20,9.67,24.66,0.0,0.0,26.0
+"1",CL,2009-05-04 00:00:00.000,KI-037,Manzana rda. dela. kia rio stylus 03 mobis,6,46.0,10,12.18,31.06,0.0,0.0,10.0
+"1",CL,2009-05-04 00:00:00.000,KI-040,V�lvula pcb kia rio/ mobis,6,46.0,100,1.03,3.01,0.0,0.0,89.0
+"1",CL,2009-05-04 00:00:00.000,KI-045,Ret�n rueda dela.kia rio/mobis,6,46.0,162,0.29,0.74,0.0,0.0,178.0
+"1",CL,2009-05-04 00:00:00.000,KI-046,Terminal direcci�n der. kia exite/mobis,6,46.0,20,6.52,18.03,0.0,0.0,24.0
+"1",CL,2009-05-04 00:00:00.000,KI-047,Terminal direcci�n izq. kia exite/mobis,6,46.0,20,6.52,18.03,0.0,0.0,20.0
+"1",CL,2009-05-04 00:00:00.000,KI-051,Caucho barra templadora kia rio /mobis,6,46.0,190,1.94,4.95,0.0,0.0,180.0
+"1",CL,2009-05-04 00:00:00.000,KI-052,Espaciadora rda. dela. rio stylus/mobis,6,46.0,205,0.32,0.82,0.0,0.0,205.0
+"1",CL,2009-05-04 00:00:00.000,KI-053,Espiral post.kia picanto/mobis,6,46.0,8,6.52,16.63,0.0,0.0,8.0
+"1",CL,2009-05-04 00:00:00.000,KI-056,Bomba gasolina kia rio comp. mobis,6,46.0,10,62.43,159.2,0.0,0.0,4.0
+"1",CL,2009-05-04 00:00:00.000,KI-057,Boya tanque gasolina rio stylus mobis,6,46.0,3,12.55,32.0,0.0,0.0,16.0
+"1",CL,2009-05-04 00:00:00.000,KI-062,Articulaci�n kia picanto mobis,6,46.0,13,6.33,16.14,0.0,0.0,13.0
+"1",CL,2009-05-04 00:00:00.000,KI-063,Radiador kia picanto,6,46.0,1,52.85,134.77,0.0,0.0,0.0
+"1",CL,2009-05-04 00:00:00.000,KI-066,Radiador kia picanto hcc,6,46.0,20,33.44,85.27,0.0,0.0,5.0
+"1",CL,2009-05-04 00:00:00.000,KI-067,"Barra templadora izq. kia rio,mobis",6,46.0,15,15.38,39.22,0.0,0.0,7.0
+"1",CL,2009-05-04 00:00:00.000,KI-068,"Electroventilador kia rio, alterno",6,46.0,50,17.02,43.4,0.0,0.0,43.0
