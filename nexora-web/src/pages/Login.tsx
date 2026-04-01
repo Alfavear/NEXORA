@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
+import * as AuthAPI from '../api/auth';
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -25,17 +26,16 @@ export default function Login() {
       // ✅ Opción A: login sin branchId
       await login(email, password);
 
-      // si tiene más de 1 sede, obligamos a escoger
-      const count = (me?.branches?.length ?? 0);
-      const hasMany = count > 1;
+      // obtener datos actualizados inmediatamente
+      const userData = await AuthAPI.me();
+      const meRole = userData.role;
+      const branchCount = userData.branches.length;
 
-      // Nota: me puede tardar un tick, por eso usamos branches memo (y fallback)
-      // Si por timing no está aún, igual el siguiente render lo tendrá.
-      if ((branches.length || count) > 1) {
-        setStep("PICK_BRANCH");
-        setSelectedBranchId((branches[0]?.branchId ?? null) as number | null);
+      if (meRole === 'VENDEDOR' || branchCount > 1) {
+        setStep('PICK_BRANCH');
+        setSelectedBranchId((userData.branches[0]?.branchId ?? null) as number | null);
       } else {
-        navigate("/");
+        navigate('/');
       }
     } catch (err: any) {
       setError(err?.response?.data?.message || "Error de autenticación");
@@ -62,15 +62,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md card p-6">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-indigo-200/60 border border-indigo-200 flex items-center justify-center font-bold">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md card p-8 border-white/20 shadow-2xl">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-indigo-400 to-cyan-400 text-white border border-white/20 flex items-center justify-center font-extrabold">
             N
           </div>
           <div>
-            <div className="text-lg font-semibold">Nexora</div>
-            <div className="text-xs text-slate-500">Accede a tu sede</div>
+            <div className="text-xl font-extrabold text-white">Nexora</div>
+            <div className="text-xs text-indigo-100">Accede a tu sede</div>
           </div>
         </div>
 

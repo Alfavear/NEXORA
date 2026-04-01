@@ -1,11 +1,21 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserBranchesDto } from './dto/update-user-branches.dto';
 
-type ReqUser = { sub: number; email: string; role: 'ADMIN' | 'VENDEDOR'; branchId: number };
+type ReqUser = {
+  sub: number;
+  email: string;
+  role: 'ADMIN' | 'VENDEDOR';
+  branchId: number;
+};
 
 @Injectable()
 export class UsersService {
@@ -32,8 +42,11 @@ export class UsersService {
     const companyId = await this.getActorCompanyId(actor.sub);
 
     // email único
-    const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (exists) throw new BadRequestException('Ya existe un usuario con ese email');
+    const exists = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (exists)
+      throw new BadRequestException('Ya existe un usuario con ese email');
 
     // validar que todas las sedes pertenezcan a la empresa
     const branches = await this.prisma.branch.findMany({
@@ -41,14 +54,17 @@ export class UsersService {
       select: { id: true },
     });
     if (branches.length !== dto.branchIds.length) {
-      throw new ForbiddenException('Una o más sedes no existen o no pertenecen a tu empresa');
+      throw new ForbiddenException(
+        'Una o más sedes no existen o no pertenecen a tu empresa',
+      );
     }
 
     const vendedorRole = await this.prisma.role.findUnique({
       where: { name: 'VENDEDOR' },
       select: { id: true },
     });
-    if (!vendedorRole) throw new BadRequestException('No existe el rol VENDEDOR');
+    if (!vendedorRole)
+      throw new BadRequestException('No existe el rol VENDEDOR');
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
@@ -75,7 +91,12 @@ export class UsersService {
         createdAt: true,
         role: { select: { name: true } },
         userBranches: {
-          select: { branchId: true, isActive: true, assignedAt: true, branch: { select: { name: true } } },
+          select: {
+            branchId: true,
+            isActive: true,
+            assignedAt: true,
+            branch: { select: { name: true } },
+          },
         },
       },
     });
@@ -96,7 +117,12 @@ export class UsersService {
         createdAt: true,
         role: { select: { name: true } },
         userBranches: {
-          select: { branchId: true, isActive: true, assignedAt: true, branch: { select: { name: true } } },
+          select: {
+            branchId: true,
+            isActive: true,
+            assignedAt: true,
+            branch: { select: { name: true } },
+          },
           orderBy: { branchId: 'asc' },
         },
       },
@@ -130,7 +156,11 @@ export class UsersService {
   }
 
   // Reemplaza lista de sedes: las nuevas quedan activas, las que no estén se desactivan
-  async replaceBranches(userId: number, dto: UpdateUserBranchesDto, actor: ReqUser) {
+  async replaceBranches(
+    userId: number,
+    dto: UpdateUserBranchesDto,
+    actor: ReqUser,
+  ) {
     const companyId = await this.getActorCompanyId(actor.sub);
 
     // usuario pertenece a empresa
@@ -146,7 +176,9 @@ export class UsersService {
       select: { id: true },
     });
     if (branches.length !== dto.branchIds.length) {
-      throw new ForbiddenException('Una o más sedes no existen o no pertenecen a tu empresa');
+      throw new ForbiddenException(
+        'Una o más sedes no existen o no pertenecen a tu empresa',
+      );
     }
 
     // 1) desactivar todas las actuales
@@ -173,7 +205,12 @@ export class UsersService {
         isActive: true,
         role: { select: { name: true } },
         userBranches: {
-          select: { branchId: true, isActive: true, assignedAt: true, branch: { select: { name: true } } },
+          select: {
+            branchId: true,
+            isActive: true,
+            assignedAt: true,
+            branch: { select: { name: true } },
+          },
           orderBy: { branchId: 'asc' },
         },
       },

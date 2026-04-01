@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { suppliersApi } from '../api/suppliers';
-import type { Supplier, CreateSupplierDto, UpdateSupplierDto } from '../api/suppliers';
+import type { Supplier, CreateSupplierDto } from '../api/suppliers';
 
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
