@@ -84,7 +84,9 @@ export class SalesService {
 
     const isCredit = Boolean(dto.isCredit);
     const dueDate = dto.dueDate ? new Date(dto.dueDate) : null;
-    const initialPayment = Number(dto.initialPayment || 0);
+    const payments = dto.payments || [];
+    
+    let paidAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0);
 
     if (isCredit && !dueDate) {
       throw new BadRequestException(
@@ -92,31 +94,22 @@ export class SalesService {
       );
     }
 
-    if (initialPayment > total) {
+    if (paidAmount > total) {
       throw new BadRequestException(
-        'El pago inicial no puede exceder el total',
+        'La suma total de pagos no puede exceder el total de la venta',
       );
     }
 
-    let paidAmount = 0;
-    let outstanding = total;
+    let outstanding = Number((total - paidAmount).toFixed(2));
     let paymentStatus: 'PAID' | 'PARTIAL' | 'PENDING' = 'PAID';
 
-    if (!isCredit) {
-      paidAmount = total;
+    if (outstanding <= 0) {
       outstanding = 0;
       paymentStatus = 'PAID';
+    } else if (paidAmount <= 0) {
+      paymentStatus = 'PENDING';
     } else {
-      paidAmount = initialPayment;
-      outstanding = Number((total - initialPayment).toFixed(2));
-      if (outstanding <= 0) {
-        outstanding = 0;
-        paymentStatus = 'PAID';
-      } else if (paidAmount <= 0) {
-        paymentStatus = 'PENDING';
-      } else {
-        paymentStatus = 'PARTIAL';
-      }
+      paymentStatus = 'PARTIAL';
     }
 
     await this.prisma.sale.update({
@@ -132,15 +125,17 @@ export class SalesService {
       },
     });
 
-    if (paidAmount > 0) {
-      await this.prisma.salePayment.create({
-        data: {
-          saleId: sale.id,
-          amount: paidAmount,
-          method: isCredit ? 'Pago inicial' : 'Contado',
-          notes: isCredit ? 'Pago inicial en venta a crédito' : 'Venta contado',
-        },
-      });
+    for (const payment of payments) {
+      if (payment.amount > 0) {
+        await this.prisma.salePayment.create({
+          data: {
+            saleId: sale.id,
+            paymentMethodId: payment.paymentMethodId,
+            amount: payment.amount,
+            notes: 'Abono inicial en venta',
+          },
+        });
+      }
     }
 
     return this.prisma.sale.findUnique({
@@ -148,7 +143,7 @@ export class SalesService {
       include: {
         customer: true,
         details: { include: { item: true } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
       },
     });
   }
@@ -173,7 +168,7 @@ export class SalesService {
         customer: true,
         details: { include: { item: true } },
         returns: { include: { details: { include: { item: true } } } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
       },
     });
     if (!sale) throw new NotFoundException('Venta no encontrada');
@@ -187,7 +182,7 @@ export class SalesService {
       include: {
         customer: true,
         details: { include: { item: true } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
       },
       orderBy: { dueDate: 'asc' },
     });
@@ -212,7 +207,7 @@ export class SalesService {
     userId: number,
     saleId: number,
     amount: number,
-    method: string,
+    paymentMethodId: number,
     notes?: string,
   ) {
     const { companyId } = await this.getUserContext(userId);
@@ -244,7 +239,7 @@ export class SalesService {
       data: {
         saleId,
         amount,
-        method,
+        paymentMethodId,
         notes,
       },
     });
@@ -259,7 +254,7 @@ export class SalesService {
       include: {
         customer: true,
         details: { include: { item: true } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
       },
     });
   }
@@ -474,7 +469,7 @@ export class SalesService {
       include: {
         customer: true,
         details: { include: { item: true } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
       },
       orderBy: { dueDate: 'asc' },
     });

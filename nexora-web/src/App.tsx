@@ -7,6 +7,7 @@ import Users from "./pages/Users";
 import Suppliers from "./pages/Suppliers";
 import Customers from "./pages/Customers";
 import Sales from "./pages/Sales";
+import Purchases from "./pages/Purchases";
 import Returns from "./pages/Returns";
 import Reports from "./pages/Reports";
 import Kardex from "./pages/Kardex";
@@ -17,6 +18,7 @@ import ItemGroups from "./pages/ItemGroups";
 import ItemBrands from "./pages/ItemBrands";
 import ItemOwners from "./pages/ItemOwners";
 import Adjustments from "./pages/Adjustments";
+import PaymentMethods from "./pages/PaymentMethods";
 
 function RequireAuth() {
   const { token, loading } = useAuth();
@@ -38,6 +40,7 @@ export default function App() {
             <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/sales" element={<Sales />} />
+            <Route path="/purchases" element={<Purchases />} />
             <Route path="/returns" element={<Returns />} />
             <Route path="/adjustments" element={<Adjustments />} />
             <Route path="/reports" element={<Reports />} />
@@ -48,6 +51,7 @@ export default function App() {
             <Route path="/item-brands" element={<ItemBrands />} />
             <Route path="/item-owners" element={<ItemOwners />} />
             <Route path="/maintenance" element={<Maintenance />} />
+            <Route path="/payment-methods" element={<PaymentMethods />} />
           </Route>
         </Routes>
       </BrowserRouter>

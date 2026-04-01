@@ -74,10 +74,9 @@ export class CreateItemDto {
   @Min(1)
   ownerId?: number;
 
-  @IsOptional()
   @IsInt()
   @Min(1)
-  providerId?: number;
+  providerId: number;
 
   @IsOptional()
   @IsString()

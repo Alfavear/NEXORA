@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { itemsApi } from '../api/items';
 import { customersApi } from '../api/customers';
 import { salesApi } from '../api/sales';
+import { paymentMethodsApi, type PaymentMethod } from '../api/payment-methods';
 
 export default function Sales() {
   const { me } = useAuth();
@@ -18,21 +19,24 @@ export default function Sales() {
   const [notes, setNotes] = useState('');
   const [saleType, setSaleType] = useState<'CONTADO' | 'CRÉDITO'>('CONTADO');
   const [dueDate, setDueDate] = useState('');
-  const [initialPayment, setInitialPayment] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [transport, setTransport] = useState(0);
   const [selectedCreditSaleId, setSelectedCreditSaleId] = useState<number | null>(null);
   const [selectedCreditSale, setSelectedCreditSale] = useState<any>(null);
   const [paymentAmount, setPaymentAmount] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState('Efectivo');
+  const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
   const [paymentNotes, setPaymentNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [payments, setPayments] = useState<{ paymentMethodId: number; amount: number }[]>([]);
 
   useEffect(() => {
     itemsApi.list().then((r: any) => setItems(r.data ?? r));
     customersApi.getAll(true).then((r: any) => setCustomers(r.data ?? r));
     salesApi.list().then((r: any) => setSales(r.data ?? r));
+    paymentMethodsApi.getAll().then((r) => setPaymentMethods(r.filter((p: PaymentMethod) => p.isActive)));
   }, []);
 
   const filteredItems = useMemo(
@@ -126,7 +130,7 @@ export default function Sales() {
     setNotes('');
     setSaleType('CONTADO');
     setDueDate('');
-    setInitialPayment(0);
+    setPayments([]);
     setDiscount(0);
     setTransport(0);
     setMessage(null);
@@ -160,7 +164,7 @@ export default function Sales() {
         notes: `${notes || ''} | Tipo: ${saleType} | Desc: ${discount.toFixed(2)} | IVA: ${tax.toFixed(2)} | Transp: ${transport.toFixed(2)}`,
         isCredit: saleType === 'CRÉDITO',
         dueDate: saleType === 'CRÉDITO' ? dueDate : undefined,
-        initialPayment: saleType === 'CRÉDITO' ? initialPayment : 0,
+        payments: payments.filter((p) => p.amount > 0 && p.paymentMethodId > 0),
         items: cart.map((i) => ({ itemId: i.itemId, quantity: i.quantity, unitPrice: i.isGift ? 0 : i.baseUnitPrice, isGift: i.isGift ?? false })),
         subtotal,
         total,
@@ -175,7 +179,7 @@ export default function Sales() {
       setSelectedCustomer(null);
       setSaleType('CONTADO');
       setDueDate('');
-      setInitialPayment(0);
+      setPayments([]);
 
       // Actualizar lista de ventas y stocks
       const updatedSales = await salesApi.list();
@@ -240,7 +244,7 @@ export default function Sales() {
     try {
       await salesApi.createPayment(selectedCreditSaleId, {
         amount: paymentAmount,
-        method: paymentMethod,
+        paymentMethodId: paymentMethodId,
         notes: paymentNotes,
       });
 
@@ -317,28 +321,69 @@ export default function Sales() {
           </label>
 
           {saleType === 'CRÉDITO' && (
-            <>
-              <label className="block mb-2">
-                Fecha de vencimiento
-                <input
-                  type="date"
-                  className="input mt-1"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                />
-              </label>
-              <label className="block mb-2">
-                Pago inicial
+            <label className="block mb-2">
+              Fecha de vencimiento
+              <input
+                type="date"
+                className="input mt-1"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </label>
+          )}
+
+          <div className="mt-4 p-3 rounded-xl border border-indigo-500/30 bg-indigo-900/10 space-y-3">
+            <h3 className="font-semibold text-indigo-200">Pagos</h3>
+            {payments.map((p, idx) => (
+              <div key={idx} className="flex gap-2">
+                <select
+                  className="input flex-1 bg-white text-black"
+                  value={p.paymentMethodId}
+                  onChange={(e) => {
+                    const newId = Number(e.target.value);
+                    setPayments((prev) => prev.map((item, i) => (i === idx ? { ...item, paymentMethodId: newId } : item)));
+                  }}
+                >
+                  <option value={0}>Selecciona método</option>
+                  {paymentMethods.map((pm) => (
+                    <option key={pm.id} value={pm.id}>
+                      {pm.name}
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="number"
-                  min={0}
-                  className="input mt-1"
-                  value={initialPayment}
-                  onChange={(e) => setInitialPayment(Number(e.target.value) || 0)}
+                  min={0.01}
+                  step="0.01"
+                  className="input w-32"
+                  value={p.amount}
+                  onChange={(e) => {
+                    const newAmount = Number(e.target.value);
+                    setPayments((prev) => prev.map((item, i) => (i === idx ? { ...item, amount: newAmount } : item)));
+                  }}
                 />
-              </label>
-            </>
-          )}
+                <button
+                  className="btn-danger p-2"
+                  onClick={() => setPayments((prev) => prev.filter((_, i) => i !== idx))}
+                >
+                  X
+                </button>
+              </div>
+            ))}
+            <div className="flex gap-2 text-sm text-slate-300">
+              Pagado acumulado: ${payments.reduce((acc, p) => acc + p.amount, 0).toFixed(2)}
+            </div>
+            <button
+              className="btn-soft w-full text-sm"
+              onClick={() => {
+                const alreadyAdded = payments.reduce((acc, p) => acc + p.amount, 0);
+                const remaining = total - alreadyAdded;
+                setPayments([...payments, { paymentMethodId: 0, amount: remaining > 0 ? remaining : 0 }]);
+              }}
+            >
+              + Añadir pago
+            </button>
+          </div>
 
           <label className="block mb-2">
             Descuento
@@ -596,7 +641,7 @@ export default function Sales() {
                 selectedCreditSale.payments.map((p: any) => (
                   <div key={p.id} className="border border-slate-600 rounded p-2 bg-slate-800/50">
                     <div>{new Date(p.createdAt).toLocaleString()}</div>
-                    <div>Monto: ${Number(p.amount).toFixed(2)} / {p.method}</div>
+                    <div>Monto: ${Number(p.amount).toFixed(2)} / {p.paymentMethod?.name || p.method || '-'}</div>
                     <div>Nota: {p.notes || '-'}</div>
                   </div>
                 ))
@@ -625,7 +670,18 @@ export default function Sales() {
           </label>
           <label className="block">
             Método
-            <input className="input mt-1" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} />
+            <select
+              className="input mt-1 bg-white text-black"
+              value={paymentMethodId}
+              onChange={(e) => setPaymentMethodId(Number(e.target.value))}
+            >
+              <option value={0}>Seleccione método</option>
+              {paymentMethods.map((pm) => (
+                <option key={pm.id} value={pm.id}>
+                  {pm.name}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="block md:col-span-2">
             Notas

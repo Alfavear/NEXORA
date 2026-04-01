@@ -309,8 +309,9 @@ export default function Maintenance() {
                 className="input"
                 value={newItem.providerId}
                 onChange={(e) => setNewItem((prev) => ({ ...prev, providerId: Number(e.target.value) }))}
+                required
               >
-                <option value={0}>Proveedor (opcional)</option>
+                <option value={0}>Proveedor (requerido)</option>
                 {suppliers.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>
                     {supplier.name}

@@ -25,6 +25,7 @@ model Company {
   itemOwners ItemOwner[]
   items      Item[]
   sales      Sale[]
+  purchases  Purchase[]
   returns    SaleReturn[]
   movements  InventoryMovement[]
   inventoryAdjustments InventoryAdjustment[]
@@ -44,6 +45,7 @@ model Branch {
   userBranches UserBranch[]
   stocks       BranchStock[]
   sales        Sale[]
+  purchases    Purchase[]
   returns      SaleReturn[]
   movements    InventoryMovement[]
   inventoryAdjustments InventoryAdjustment[]
@@ -72,6 +74,7 @@ model User {
 
   userBranches UserBranch[]
   sales        Sale[]
+  purchases    Purchase[]
   returns      SaleReturn[]
   movements    InventoryMovement[]
   requestedAdjustments InventoryAdjustment[] @relation("InventoryAdjustmentRequestedBy")
@@ -109,7 +112,8 @@ model Supplier {
   company   Company @relation(fields: [companyId], references: [id])
   companyId Int
 
-  items Item[]
+  items     Item[]
+  purchases Purchase[]
 
   @@index([companyId])
 }
@@ -211,7 +215,7 @@ model Item {
   discountPercent   Decimal? @db.Decimal(5, 2)
   promotionPercent  Decimal? @db.Decimal(5, 2)
   ownerId           Int?
-  providerId        Int?
+  providerId        Int
   observations      String?
   trackStock        Boolean  @default(true)
   isActive          Boolean  @default(true)
@@ -226,11 +230,12 @@ model Item {
   group  ItemGroup? @relation(fields: [groupId], references: [id])
   brand  ItemBrand? @relation(fields: [brandId], references: [id])
   owner  ItemOwner? @relation(fields: [ownerId], references: [id])
-  supplier Supplier? @relation(fields: [providerId], references: [id])
+  supplier Supplier @relation(fields: [providerId], references: [id])
 
   stocks       BranchStock[]
-  saleDetails  SaleDetail[]
-  returnDetails SaleReturnDetail[]
+  saleDetails    SaleDetail[]
+  purchaseDetails PurchaseDetail[]
+  returnDetails  SaleReturnDetail[]
   movements    InventoryMovement[]
   inventoryAdjustments InventoryAdjustment[]
 
@@ -448,5 +453,44 @@ model SaleReturnDetail {
   item       Item       @relation(fields: [itemId], references: [id])
 
   @@index([saleReturnId])
+  @@index([itemId])
+}
+
+model Purchase {
+  id                    Int                 @id @default(autoincrement())
+  companyId             Int
+  branchId              Int
+  supplierId            Int
+  createdById           Int
+  systemNumber          String
+  supplierInvoiceNumber String?
+  subtotal              Decimal             @default(0) @db.Decimal(12, 2)
+  total                 Decimal             @default(0) @db.Decimal(12, 2)
+  notes                 String?
+  createdAt             DateTime            @default(now())
+
+  company   Company  @relation(fields: [companyId], references: [id])
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  supplier  Supplier @relation(fields: [supplierId], references: [id])
+  createdBy User     @relation(fields: [createdById], references: [id])
+
+  details PurchaseDetail[]
+
+  @@unique([companyId, systemNumber])
+  @@index([branchId, createdAt])
+}
+
+model PurchaseDetail {
+  id         Int     @id @default(autoincrement())
+  purchaseId Int
+  itemId     Int
+  quantity   Decimal @db.Decimal(14, 2)
+  unitCost   Decimal @db.Decimal(12, 2)
+  subtotal   Decimal @db.Decimal(12, 2)
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  item     Item     @relation(fields: [itemId], references: [id])
+
+  @@index([purchaseId])
   @@index([itemId])
 }

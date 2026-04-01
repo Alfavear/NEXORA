@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Min, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateSalePaymentDto {
@@ -7,8 +7,9 @@ export class CreateSalePaymentDto {
   @Min(0.01)
   amount: number;
 
-  @IsString()
-  method: string;
+  @IsInt()
+  @Min(1)
+  paymentMethodId: number;
 
   @IsOptional()
   @IsString()

@@ -92,7 +92,7 @@ export class ItemsService {
           discountPercent: dto.discountPercent ?? null,
           promotionPercent: dto.promotionPercent ?? null,
           ownerId: dto.ownerId || null,
-          providerId: dto.providerId || null,
+          providerId: dto.providerId,
           observations: dto.observations?.trim() ?? null,
           imageUrl: dto.imageUrl?.trim() || null,
         },
@@ -188,7 +188,7 @@ export class ItemsService {
     if (dto.promotionPercent !== undefined)
       data.promotionPercent = dto.promotionPercent ?? null;
     if (dto.ownerId !== undefined) data.ownerId = dto.ownerId || null;
-    if (dto.providerId !== undefined) data.providerId = dto.providerId || null;
+    if (dto.providerId !== undefined) data.providerId = dto.providerId;
     if (dto.observations !== undefined)
       data.observations = dto.observations?.trim() || null;
     if (dto.imageUrl !== undefined)
