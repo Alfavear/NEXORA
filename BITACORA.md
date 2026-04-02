@@ -333,5 +333,13 @@ Empieza por:
 4. trabajar sobre `feature-finance-foundation`
 
 Si detectas algo importante que pueda romper compatibilidad con `main`, dilo antes de implementar.
-=======
->>>>>>> origin/ai-polish-final
+
+---
+
+## Log de Trabajo (Actual) - Fase Fundación Financiera y Operativa
+
+### Avance: Módulo de Compras, Kardex y Ventas
+- **Compras (Backend/Frontend):** Se creó el componente transaccional que permite registrar Entradas y Aumentos de stock. Se forzó la relación obligatoria artículo-proveedor (`providerId` NOT NULL) salvaguardando integridad. Adicionalmente, se incluyó la función UX de "Crear Artículo Rápido" (Modal in-line) directamente en la pantalla de compras agilizando el flujo del dependiente.
+- **Kardex (Libro Mayor de Inventarios):** Se reemplazó por completo la vista rudimentaria. Ahora cuenta con un Dashboard Master que cruza los movimientos de `InventoryMovement`, permite filtrar por Artículo y por Sede, y emite un layout del Libro Mayor (Ledger) con Entradas en verde, Salidas en rojo, usuarios responsables, saldos consolidados y tarjetas de recuento financiero en tiempo real.
+- **Módulo POS de Venta (Sales):** Se integró la nueva vista de Tirilla Térmica (`InvoicePrint`) directamente al finalizar el `Checkout`. Ahora la venta arroja una ventana de "Venta Exitosa" que provee al dependiente un acceso directo para Imprimir un comprobante optimizado para 80mm usando ReactToPrint.
+- **Estabilización de Datos y Dashboard Principal:** Se ajustaron los scripts de Siembra (`seed-legacy`) para respetar las nuevas políticas restrictivas (proveedor) para que el app compile al 100%. Simultáneamente, el Dashboard gerencial fue escalado de "Ventas del Día" a una métrica retrospectiva móvil más madura de "Últimos 30 Días".
