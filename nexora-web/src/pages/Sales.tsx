@@ -1,10 +1,13 @@
 // POS completo: crea ventas reales en backend
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { useAuth } from '../auth/AuthContext';
 import { itemsApi } from '../api/items';
 import { customersApi } from '../api/customers';
 import { salesApi } from '../api/sales';
 import { paymentMethodsApi, type PaymentMethod } from '../api/payment-methods';
+
+import { InvoicePrint } from './Reports/templates/InvoicePrint';
 
 export default function Sales() {
   const { me } = useAuth();
@@ -27,6 +30,13 @@ export default function Sales() {
   const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
   const [paymentNotes, setPaymentNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [saleToPrint, setSaleToPrint] = useState<any>(null);
+  
+  const printRef = useRef(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: 'Ticket_Venta'
+  });
   const [message, setMessage] = useState<string | null>(null);
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -171,8 +181,11 @@ export default function Sales() {
       };
 
       const res = await salesApi.create(payload);
+      
+      const createdSale = res.data ?? res;
+      setMessage(`Venta creada con N° ${createdSale?.systemNumber ?? ''}`);
+      setSaleToPrint(createdSale);
 
-      setMessage(`Venta creada con N° ${res.data?.systemNumber ?? res.data?.systemNumber ?? ''}`);
       setCart([]);
       setNotes('');
       setExternalReceipt('');
@@ -205,27 +218,10 @@ export default function Sales() {
   };
 
   const printSale = (sale: any) => {
-    const html = `
-      <h1>Factura: ${sale.systemNumber}</h1>
-      <p>Cliente: ${sale.customer?.name ?? 'Genérico'}</p>
-      <p>Fecha: ${new Date(sale.createdAt).toLocaleString()}</p>
-      <p>Total: ${Number(sale.total).toFixed(2)}</p>
-      <p>Pagado: ${Number(sale.paidAmount).toFixed(2)}</p>
-      <p>Saldo: ${Number(sale.outstanding).toFixed(2)}</p>
-      <p>Estado: ${sale.paymentStatus}</p>
-      <h2>Detalles</h2>
-      <table border="1" cellspacing="0" cellpadding="4" width="100%">
-        <thead><tr><th>Item</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
-        <tbody>
-          ${sale.details?.map((d: any) => `<tr><td>${d.item?.name ?? '-'} </td><td>${d.quantity}</td><td>${Number(d.unitPrice).toFixed(2)}</td><td>${Number(d.subtotal).toFixed(2)}</td></tr>`).join('')}
-        </tbody>
-      </table>
-    `;
-    const win = window.open('', '_blank');
-    if (!win) return;
-    win.document.write(`<html><body>${html}</body></html>`);
-    win.document.close();
-    win.print();
+    setSaleToPrint(sale);
+    setTimeout(() => {
+      handlePrint();
+    }, 100);
   };
 
   const submitPayment = async () => {
@@ -692,6 +688,40 @@ export default function Sales() {
           </button>
         </div>
       </div>
+
+      {/* Hidden print component */}
+      <div className="hidden">
+        <InvoicePrint ref={printRef} data={saleToPrint ? [saleToPrint] : []} />
+      </div>
+
+      {/* Success Modal for printing */}
+      {saleToPrint && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-fade-in backdrop-blur-sm">
+          <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col items-center">
+            <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-4 border border-emerald-500/50">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 className="text-xl font-bold text-slate-100 mb-2 text-center">¡Venta Exitosa!</h2>
+            <p className="text-sm text-slate-400 mb-6 text-center">La venta ha sido registrada correctamente.</p>
+            <div className="w-full space-y-3">
+              <button 
+                onClick={handlePrint} 
+                className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                Imprimir Tirilla (Ticket)
+              </button>
+              <button 
+                onClick={() => setSaleToPrint(null)} 
+                className="btn-soft w-full py-2"
+              >
+                Continuar nueva venta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
