@@ -102,7 +102,8 @@ Fecha: 30 marzo 2026
   - Se verificó que el build de ambos módulos (`api` y `web`) sea exitoso.
 - **Plan de Acción:**
   1. Realizar commit y push de cambios pendientes.
-  2. Configurar Neon.tech y obtener `DATABASE_URL`.
-  3. Desplegar API en Render (`nexora-api`).
+  2. Configurar Neon.tech y obtener `DATABASE_URL`. [COMPLETADO]
+    - Se ejecutó `npx prisma db push --skip-generate` con éxito hacia el host de Neon.
+  3. Desplegar API en Render (`nexora-api`). [EN PROCESO]
   4. Desplegar Frontend en Vercel (`nexora-web`) apuntando a la API de Render.
   5. Validar flujo completo (Login -> Transacción -> Reporte).
