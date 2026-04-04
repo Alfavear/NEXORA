@@ -85,3 +85,24 @@ Fecha: 30 marzo 2026
 ## Planificación para la siguiente sesión (Movilidad y UX)
 - **POS Responsivo (Móvil e iPad):** Adaptar la interfaz del módulo de "Facturación y Cartera" (`Sales.tsx`) para que sea 100% responsiva y amigable con pantallas táctiles.
 - **Ventas en Piso:** Permitir a los vendedores registrar ventas y armar carritos directamente desde sus tablets o teléfonos celulares, optimizando el flujo de atención al cliente sin depender del computador principal de la caja (requerimiento operativo para nuevas sedes).
+
+## Avance UX / Movilidad
+- **Menú Hamburger y Shell Responsivo:** Se rediseñó el `Shell.tsx` para ocultar el Sidebar en resoluciones pequeñas (tablets verticales/celulares) e invocarlo mediante un menú hamburguesa con un overlay oscuro, otorgando 100% del ancho al espacio de trabajo.
+- **Layout Invertido en el POS (`Sales.tsx`):** Se utilizó `CSS Grid Order` para que, en pantallas móviles, el catálogo de productos y el carrito de compras aparezcan en la parte superior (prioridad 1), desplazando los detalles de pago a la parte inferior. Esto permite a los vendedores armar carritos de pie interactuando en primer plano con el cliente.
+- **Zonas Táctiles (Touch Targets):** Se rediseñó la línea de artículos del carrito con botones `[ - ]` y `[ + ]` amplios, espaciado adecuado e inputs numéricos configurados con `inputMode="decimal"` para disparar el teclado numérico nativo en celulares.
+
+## Fase de Despliegue a Producción (04 de abril 2026)
+- **Objetivo:** Desplegar la primera versión funcional de Nexora utilizando servicios PaaS en su capa gratuita (Free Tier) para validación en un entorno real.
+- **Stack Seleccionado:**
+  - **Base de Datos:** [Neon.tech](https://neon.tech/) (PostgreSQL Serverless) - Capa gratuita.
+  - **Backend (API):** [Render.com](https://render.com/) (Web Service) - Instancia gratuita (Free Instance).
+  - **Frontend (Web):** [Vercel.com](https://vercel.com/) (Hobby Plan) - Gratuito para proyectos personales/pruebas.
+- **Preparación:**
+  - Se identificaron archivos modificados localmente (`Login.tsx`, `tsconfig.json`) que serán sincronizados con el repositorio en `GitHub`.
+  - Se verificó que el build de ambos módulos (`api` y `web`) sea exitoso.
+- **Plan de Acción:**
+  1. Realizar commit y push de cambios pendientes.
+  2. Configurar Neon.tech y obtener `DATABASE_URL`.
+  3. Desplegar API en Render (`nexora-api`).
+  4. Desplegar Frontend en Vercel (`nexora-web`) apuntando a la API de Render.
+  5. Validar flujo completo (Login -> Transacción -> Reporte).

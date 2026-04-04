@@ -335,9 +335,9 @@ export default function Sales() {
   };
 
   return (
-    <div className="p-4 space-y-6 text-slate-100">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Facturación y Cartera</h1>
+    <div className="p-2 md:p-4 space-y-4 md:space-y-6 text-slate-100">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+        <h1 className="text-2xl md:text-3xl font-bold">Facturación y POS</h1>
         <span className="text-sm text-slate-300">Vendedor: {me?.name ?? 'Desconocido'}</span>
       </div>
 
@@ -345,24 +345,26 @@ export default function Sales() {
         <div className="rounded-xl bg-emerald-500/20 border border-emerald-400 text-emerald-100 p-3">{message}</div>
       )}
 
-      <div className="flex flex-col md:flex-row justify-between gap-4 border-b border-slate-700 pb-4">
-        <div className="flex gap-2">
-          <button className={`btn ${activeTab === 'POS' ? 'btn-primary' : 'btn-soft'}`} onClick={() => setActiveTab('POS')}>Punto de Venta</button>
-          <button className={`btn ${activeTab === 'HISTORY' ? 'btn-primary' : 'btn-soft'}`} onClick={() => setActiveTab('HISTORY')}>Historial</button>
-          <button className={`btn ${activeTab === 'CARTERA' ? 'btn-primary' : 'btn-soft'}`} onClick={() => setActiveTab('CARTERA')}>Cartera y Abonos</button>
+      <div className="flex flex-col md:flex-row justify-between gap-4 border-b border-slate-700 pb-2 md:pb-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar w-full md:w-auto snap-x">
+          <button className={`btn whitespace-nowrap snap-start px-4 md:px-6 ${activeTab === 'POS' ? 'btn-primary' : 'btn-soft'}`} onClick={() => setActiveTab('POS')}>Punto de Venta</button>
+          <button className={`btn whitespace-nowrap snap-start px-4 md:px-6 ${activeTab === 'HISTORY' ? 'btn-primary' : 'btn-soft'}`} onClick={() => setActiveTab('HISTORY')}>Historial</button>
+          <button className={`btn whitespace-nowrap snap-start px-4 md:px-6 ${activeTab === 'CARTERA' ? 'btn-primary' : 'btn-soft'}`} onClick={() => setActiveTab('CARTERA')}>Cartera y Abonos</button>
         </div>
         {activeTab === 'POS' && (
-          <div className="inline-flex gap-2">
-            <button className="btn-soft" onClick={resetForm} disabled={loading}>Limpiar</button>
-            <button className="btn-primary shadow-lg shadow-indigo-500/20" onClick={submitSale} disabled={loading}>Grabar Venta</button>
+          <div className="inline-flex gap-2 w-full md:w-auto">
+            <button className="btn-soft flex-1 md:flex-none justify-center py-3 md:py-2 font-semibold" onClick={resetForm} disabled={loading}>Limpiar</button>
+            <button className="btn-primary flex-1 md:flex-none justify-center shadow-lg shadow-indigo-500/20 py-3 md:py-2 font-bold" onClick={submitSale} disabled={loading}>Grabar Venta</button>
           </div>
         )}
       </div>
 
       {/* TAB: PUNTO DE VENTA */}
       {activeTab === 'POS' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in">
-        <div className="card p-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+        
+        {/* LEFT COLUMN: PARAMS (MOVED TO BOTTOM ON MOBILE VIA ORDER) */}
+        <div className="card p-4 md:p-5 order-2 lg:order-1 flex flex-col gap-1">
           <h2 className="text-xl font-semibold mb-3">Cliente y parámetros</h2>
           <label className="block mb-2">
             Cliente
@@ -573,15 +575,16 @@ export default function Sales() {
             />
           </label>
           <button
-            className="btn-primary w-full mt-3"
+            className="btn-primary w-full mt-4 py-4 text-lg font-bold shadow-lg shadow-indigo-500/20 md:hidden"
             onClick={submitSale}
             disabled={loading}
           >
-            {loading ? 'Procesando venta...' : 'Registrar venta'}
+            {loading ? 'Procesando...' : 'GRABAR VENTA'}
           </button>
         </div>
 
-        <div className="card p-4 lg:col-span-2">
+        {/* RIGHT COLUMN: PRODUCTS & CART (MOVED TO TOP ON MOBILE VIA ORDER) */}
+        <div className="card p-4 md:p-5 lg:col-span-2 order-1 lg:order-2 flex flex-col">
           <h2 className="text-xl font-semibold mb-3">Agregar productos</h2>
           <div className="grid grid-cols-1 gap-2 mb-3">
             <div className="flex gap-2">
@@ -598,7 +601,7 @@ export default function Sales() {
             <div className="flex gap-2">
               <input
                 className="input flex-1"
-                placeholder="Código/Barra/Nombre"
+                placeholder="Cód / Nombre"
                 value={itemCode}
                 onChange={(e) => setItemCode(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addByCode()}
@@ -609,35 +612,39 @@ export default function Sales() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 max-h-80 overflow-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[40vh] md:max-h-[50vh] overflow-y-auto pr-2 pb-2 custom-scrollbar">
             {filteredItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => addToCart(item)}
-                className="rounded-xl border border-slate-700 p-3 text-left hover:bg-white/10 transition"
+                className="rounded-xl border border-slate-700/50 p-3 text-left bg-slate-800/40 hover:bg-indigo-900/40 hover:border-indigo-500/50 transition-colors active:scale-95 shadow-md flex flex-col justify-between h-full"
               >
-                <div className="font-semibold text-white">{item.name}</div>
-                <div className="text-xs text-slate-300">
-                  Precio: ${Number(item.salePrice ?? item.basePrice ?? 0).toFixed(2)}
+                <div className="font-bold text-white text-sm md:text-base leading-tight mb-2">{item.name}</div>
+                <div className="text-xs md:text-sm text-emerald-400 font-mono bg-emerald-500/10 px-2 py-1 rounded inline-block mt-auto">
+                  ${Number(item.salePrice ?? item.basePrice ?? 0).toFixed(2)}
                 </div>
               </button>
             ))}
           </div>
 
-          <div className="mt-5">
-            <h3 className="text-lg font-bold">Carrito</h3>
-            <div className="space-y-2 mt-2">
+          <div className="mt-6 border-t border-slate-700 pt-4">
+            <h3 className="text-lg md:text-xl font-bold mb-3 flex justify-between items-center">
+              <span>Carrito de Compras</span>
+              <span className="bg-indigo-500 text-white text-xs px-2 py-1 rounded-full">{cart.length} ítem(s)</span>
+            </h3>
+            <div className="space-y-3 mt-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
               {cart.length === 0 ? (
-                <div className="p-3 rounded-xl bg-slate-800/40">Carrito vacío</div>
+                <div className="p-8 rounded-xl bg-slate-800/20 border border-slate-700/50 border-dashed text-center text-slate-400">El carrito está vacío. Agrega productos de la lista superior.</div>
               ) : (
                 cart.map((item) => (
-                  <div key={item.itemId} className="flex gap-2 items-center rounded-xl bg-slate-800/40 p-2">
+                  <div key={item.itemId} className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center rounded-xl bg-slate-800/40 p-4 border border-slate-700/50 shadow-sm relative">
                     <div className="flex-1">
-                      <div className="font-medium text-white">{item.name}</div>
-                      <div className="text-xs text-slate-300">Precio unitario: ${Number(item.unitPrice).toFixed(2)}</div>
-                      <label className="text-xs text-slate-300 inline-flex items-center gap-1">
+                      <div className="font-bold text-white pr-6 text-sm md:text-base leading-tight">{item.name}</div>
+                      <div className="text-xs md:text-sm text-indigo-300 mt-1 font-mono">${Number(item.unitPrice).toFixed(2)} c/u</div>
+                      <label className="text-xs text-slate-400 inline-flex items-center gap-2 mt-3 cursor-pointer p-1 -ml-1 rounded hover:bg-slate-800 transition-colors w-max">
                         <input
                           type="checkbox"
+                          className="w-4 h-4 rounded bg-slate-950 border-slate-600 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900"
                           checked={item.isGift ?? false}
                           onChange={(e) => {
                             const gift = e.target.checked;
@@ -648,43 +655,29 @@ export default function Sales() {
                             );
                           }}
                         />
-                        Regalo (cero valor)
+                        Marcar como Regalo (Gratis)
                       </label>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        className="btn-soft px-2"
-                        onClick={() => updateQuantity(item.itemId, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </button>
-                      <input
-                        type="number"
-                        className="input w-16 text-center bg-white text-black"
-                        value={item.quantity}
-                        min={1}
-                        onChange={(e) => updateQuantity(item.itemId, Number(e.target.value))}
-                      />
-                      <button
-                        className="btn-soft px-2"
-                        onClick={() => updateQuantity(item.itemId, item.quantity + 1)}
-                      >
-                        +
+                    
+                    <div className="flex items-center justify-between w-full sm:w-auto gap-4 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-700/50 sm:border-0">
+                      <div className="flex items-center bg-slate-950 rounded-lg border border-slate-700 overflow-hidden shadow-inner">
+                        <button className="px-4 py-2 md:py-1.5 text-xl font-bold text-indigo-400 hover:bg-slate-800 hover:text-indigo-300 transition-colors active:bg-slate-700" onClick={() => updateQuantity(item.itemId, item.quantity - 1)} disabled={item.quantity <= 1}>-</button>
+                        <input type="number" inputMode="decimal" className="w-12 text-center bg-transparent text-white font-bold border-none focus:ring-0 p-0 text-sm md:text-base appearance-none m-0" value={item.quantity} min={1} onChange={(e) => updateQuantity(item.itemId, Number(e.target.value))} />
+                        <button className="px-4 py-2 md:py-1.5 text-xl font-bold text-indigo-400 hover:bg-slate-800 hover:text-indigo-300 transition-colors active:bg-slate-700" onClick={() => updateQuantity(item.itemId, item.quantity + 1)}>+</button>
+                      </div>
+                      <button className="bg-rose-500/10 text-rose-400 p-2.5 rounded-lg hover:bg-rose-500/20 transition-colors active:bg-rose-500/30 border border-rose-500/20 absolute top-2 right-2 sm:relative sm:top-auto sm:right-auto" onClick={() => removeFromCart(item.itemId)}>
+                        <X className="w-5 h-5" />
                       </button>
                     </div>
-                    <button className="btn-danger px-3" onClick={() => removeFromCart(item.itemId)}>
-                      Eliminar
-                    </button>
                   </div>
                 ))
               )}
             </div>
           </div>
 
-          <div className="mt-5 flex justify-between items-center">
+          <div className="mt-auto pt-6 flex justify-between items-end border-t border-slate-700">
             <div className="text-lg">Total:</div>
-            <div className="text-3xl font-bold">${total.toFixed(2)}</div>
+            <div className="text-3xl md:text-4xl font-black text-emerald-400 drop-shadow-md">${total.toFixed(2)}</div>
           </div>
         </div>
         </div>
