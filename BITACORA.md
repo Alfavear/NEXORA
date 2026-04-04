@@ -81,3 +81,7 @@ Fecha: 30 marzo 2026
 - **Refactorización UX/UI del POS:** Se reestructuró la pantalla principal de ventas hacia un módulo unificado de "Facturación y Cartera". Se separó la interfaz en pestañas (Punto de Venta, Historial, Cartera), se añadieron buscadores en tiempo real para localizar facturas/clientes, y la gestión de créditos e impresión se encapsuló en un Modal Flotante evitando la saturación visual.
 - **Dashboard Gerencial:** Se actualizó el Dashboard para consumir la API de Inteligencia de Negocios (`SALES_VOLUME`). Se integró un gráfico de barras CSS puro para visualizar los ingresos diarios del mes actual y el Top 10 de productos.
 - **Refactorización de Devoluciones:** Se rediseñó `Returns.tsx` bajo el mismo estándar de pestañas del POS ("Nueva Devolución" e "Historial"). Se incluyeron buscadores en tiempo real y se corrigió el estado de formulario para permitir gestionar retornos múltiples por factura sin cruce de datos.
+
+## Planificación para la siguiente sesión (Movilidad y UX)
+- **POS Responsivo (Móvil e iPad):** Adaptar la interfaz del módulo de "Facturación y Cartera" (`Sales.tsx`) para que sea 100% responsiva y amigable con pantallas táctiles.
+- **Ventas en Piso:** Permitir a los vendedores registrar ventas y armar carritos directamente desde sus tablets o teléfonos celulares, optimizando el flujo de atención al cliente sin depender del computador principal de la caja (requerimiento operativo para nuevas sedes).
