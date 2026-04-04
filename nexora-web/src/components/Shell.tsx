@@ -3,7 +3,7 @@ import { useAuth } from "../auth/AuthContext";
 
 const navItems = [
   { to: "/", label: "Dashboard" },
-  { to: "/sales", label: "Ventas" },
+  { to: "/sales", label: "Facturación y Cartera" },
   { to: "/purchases", label: "Compras (Almacén)" },
   { to: "/returns", label: "Devoluciones" },
   { to: "/adjustments", label: "Ajustes" },
@@ -22,6 +22,7 @@ const masterItems = [
   { to: "/item-brands", label: "Marcas" },
   { to: "/item-owners", label: "Propietarios" },
   { to: "/payment-methods", label: "Métodos de Pago" },
+  { to: "/taxes", label: "Impuestos" },
 ];
 
 export default function Shell() {

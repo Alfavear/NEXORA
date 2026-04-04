@@ -19,7 +19,10 @@ export const ReturnPrint = forwardRef<HTMLDivElement, { data: any[] }>(({ data }
         >
           {/* Header */}
           <div className="text-center mb-4 border-b border-dashed border-gray-400 pb-4">
-            <h1 className="text-xl font-bold mb-1 uppercase tracking-wider">{ret.company?.name || 'NEXORA ERP'}</h1>
+            {(ret.branch as any)?.logoUrl && (
+              <img src={(ret.branch as any).logoUrl} alt="Logo Sede" className="w-20 h-20 mx-auto mb-2 object-contain grayscale" />
+            )}
+            <h1 className="text-xl font-bold mb-1 uppercase tracking-wider">{ret.branch?.name || ret.company?.name || 'SUCURSAL'}</h1>
             <p className="mt-2 text-lg font-bold border border-black inline-block px-4 py-1">NOTA DE CRÉDITO</p>
             
             <div className="mt-4 text-left space-y-1">
@@ -68,7 +71,7 @@ export const ReturnPrint = forwardRef<HTMLDivElement, { data: any[] }>(({ data }
           {/* Footer */}
           <div className="text-center text-[10px] space-y-1 mt-auto pt-4">
             <p>Este documento representa un saldo a favor del cliente.</p>
-            <p className="mt-4 opacity-50">Generado por Nexora ERP</p>
+            <p className="mt-4 opacity-50">Generado por el Sistema</p>
           </div>
         </div>
       ))}

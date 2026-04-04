@@ -18,7 +18,7 @@ export const CustomerStatementPrint = forwardRef<HTMLDivElement, Props>(({ data 
   return (
     <div ref={ref} className="bg-white text-black p-10 min-h-[1056px] w-[816px] mx-auto text-sm print:shadow-none">
       <div className="border-b-2 border-black pb-4 mb-6 text-center">
-        <h1 className="text-2xl font-bold uppercase tracking-widest">NEXORA</h1>
+        <h1 className="text-2xl font-bold uppercase tracking-widest">REPORTE DEL SISTEMA</h1>
         <p className="text-sm font-semibold text-gray-600 mt-1">ESTADO DE CUENTA CLIENTE</p>
         <p className="text-xs text-gray-500 mt-2">Emitido: {format(new Date(), 'yyyy-MM-dd HH:mm')}</p>
       </div>

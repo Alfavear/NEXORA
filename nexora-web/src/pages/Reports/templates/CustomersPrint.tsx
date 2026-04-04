@@ -38,7 +38,7 @@ export const CustomersPrint = forwardRef<HTMLDivElement, { data: any[] }>(({ dat
       </table>
 
       <div className="text-xs text-slate-500 text-center mt-16 pt-4 border-t border-slate-300">
-        Empresa Nexora ERP • Impreso el {new Date().toLocaleString()}
+        Impreso el {new Date().toLocaleString()}
       </div>
     </div>
   );

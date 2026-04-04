@@ -8,7 +8,7 @@ export default function Branches() {
   const [showModal, setShowModal] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [formData, setFormData] = useState({ name: '', address: '', phone: '' });
+  const [formData, setFormData] = useState({ name: '', address: '', phone: '', logoUrl: '' });
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function Branches() {
       }
       setShowModal(false);
       setEditingBranch(null);
-      setFormData({ name: '', address: '', phone: '' });
+      setFormData({ name: '', address: '', phone: '', logoUrl: '' }); // Reset form
       loadBranches();
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Error al guardar sucursal');
@@ -53,7 +53,12 @@ export default function Branches() {
 
   const handleEdit = (branch: Branch) => {
     setEditingBranch(branch);
-    setFormData({ name: branch.name, address: branch.address ?? '', phone: branch.phone ?? '' });
+    setFormData({
+      name: branch.name,
+      address: branch.address ?? '',
+      phone: branch.phone ?? '',
+      logoUrl: (branch as any).logoUrl ?? '',
+    });
     setShowModal(true);
   };
 
@@ -97,6 +102,7 @@ export default function Branches() {
           <table className="w-full min-w-max text-left border-collapse">
             <thead>
               <tr className="bg-slate-800 text-slate-200">
+                <th className="px-4 py-3">Logo</th>
                 <th className="px-4 py-3">Nombre</th>
                 <th className="px-4 py-3">Dirección</th>
                 <th className="px-4 py-3">Teléfono</th>
@@ -106,13 +112,18 @@ export default function Branches() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-4 text-center text-slate-400">
+                  <td colSpan={5} className="px-4 py-4 text-center text-slate-400">
                     No hay sucursales registradas
                   </td>
                 </tr>
               ) : (
                 filtered.map((branch) => (
                   <tr key={branch.id} className="hover:bg-slate-800/40">
+                    <td className="px-4 py-3">
+                      {(branch as any).logoUrl && (
+                        <img src={(branch as any).logoUrl} alt="logo" className="h-8 w-auto rounded bg-white p-1" />
+                      )}
+                    </td>
                     <td className="px-4 py-3">{branch.name}</td>
                     <td className="px-4 py-3">{branch.address || '-'}</td>
                     <td className="px-4 py-3">{branch.phone || '-'}</td>
@@ -161,6 +172,14 @@ export default function Branches() {
                   placeholder="Teléfono"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+              <div>
+                <input
+                  className="input w-full"
+                  placeholder="URL del Logo (Opcional)"
+                  value={formData.logoUrl}
+                  onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
                 />
               </div>
               {error && <div className="text-xs text-rose-300">{error}</div>}

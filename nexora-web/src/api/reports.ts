@@ -78,5 +78,16 @@ export const reportsApi = {
     if (filters?.systemNumber) params.append('systemNumber', filters.systemNumber);
     const response = await http.get(`/reports/return-reprints?${params.toString()}`);
     return response.data;
+  },
+
+  getSalesVolume: async (filters?: { year?: number; month?: number; startDate?: string; endDate?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.year) params.append('year', String(filters.year));
+    if (filters?.month) params.append('month', String(filters.month));
+    if (filters?.startDate) params.append('startDate', filters.startDate);
+    if (filters?.endDate) params.append('endDate', filters.endDate);
+    
+    const response = await http.get(`/reports/sales-volume?${params.toString()}`);
+    return response.data;
   }
 };

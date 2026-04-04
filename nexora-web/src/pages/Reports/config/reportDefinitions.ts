@@ -1,6 +1,6 @@
-import { BarChart2, Package, Users, DollarSign, Briefcase, FileText } from 'lucide-react';
+import { BarChart2, Package, Users, DollarSign, Briefcase, FileText, TrendingUp } from 'lucide-react';
 
-export type FilterFieldType = 'date-range' | 'customer' | 'seller' | 'branch' | 'item' | 'systemNumber';
+export type FilterFieldType = 'date-range' | 'customer' | 'seller' | 'branch' | 'item' | 'systemNumber' | 'year-month';
 
 export interface ReportDefinition {
   id: string;
@@ -48,6 +48,13 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
         description: 'Reimpresión de notas de crédito y devoluciones procesadas.',
         icon: FileText,
         requiredFilters: ['date-range', 'systemNumber', 'customer'],
+      },
+      {
+        id: 'SALES_VOLUME',
+        title: 'Volumen y Top Ventas',
+        description: 'Análisis de ingresos por periodo y top de productos.',
+        icon: TrendingUp,
+        requiredFilters: ['year-month'],
       }
     ]
   },

@@ -11,8 +11,7 @@ export class PurchasesService {
       throw new BadRequestException('Purchase must contain at least one item');
     }
 
-    const subtotal = dto.details.reduce((acc, dt) => acc + (dt.quantity * dt.unitCost), 0);
-    const total = subtotal;
+    const total = dto.details.reduce((acc, dt) => acc + (dt.quantity * dt.unitCost), 0);
 
     return await this.prisma.$transaction(async (tx) => {
       // Create the purchase and details
@@ -24,7 +23,7 @@ export class PurchasesService {
           createdById: user.userId,
           systemNumber: dto.systemNumber,
           supplierInvoiceNumber: dto.supplierInvoiceNumber,
-          subtotal,
+          subtotal: total,
           total,
           notes: dto.notes,
           details: {

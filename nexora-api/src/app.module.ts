@@ -18,6 +18,7 @@ import { ItemOwnersModule } from './item-owners/item-owners.module';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { ReportsModule } from './reports/reports.module';
 import { PurchasesModule } from './purchases/purchases.module';
+import { TaxesModule } from './taxes/taxes.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { PurchasesModule } from './purchases/purchases.module';
     PaymentMethodsModule,
     ReportsModule,
     PurchasesModule,
+    TaxesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

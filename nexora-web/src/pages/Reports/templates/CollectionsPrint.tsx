@@ -13,7 +13,7 @@ export const CollectionsPrint = forwardRef<HTMLDivElement, Props>(({ data, filte
     <div ref={ref} className="bg-white text-black p-10 min-h-[1056px] w-[816px] mx-auto text-sm print:shadow-none">
       <div className="border-b-2 border-black pb-4 mb-6 flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-bold uppercase tracking-widest">NEXORA</h1>
+          <h1 className="text-2xl font-bold uppercase tracking-widest">REPORTE DEL SISTEMA</h1>
           <p className="text-sm font-semibold text-gray-600 mt-1">REPORTE: RECIBOS DE CAJA / COBROS</p>
         </div>
         <div className="text-right text-xs text-gray-500 font-mono">

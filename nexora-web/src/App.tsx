@@ -19,6 +19,7 @@ import ItemBrands from "./pages/ItemBrands";
 import ItemOwners from "./pages/ItemOwners";
 import Adjustments from "./pages/Adjustments";
 import PaymentMethods from "./pages/PaymentMethods";
+import Taxes from "./pages/Taxes";
 
 function RequireAuth() {
   const { token, loading } = useAuth();
@@ -52,6 +53,7 @@ export default function App() {
             <Route path="/item-owners" element={<ItemOwners />} />
             <Route path="/maintenance" element={<Maintenance />} />
             <Route path="/payment-methods" element={<PaymentMethods />} />
+            <Route path="/taxes" element={<Taxes />} />
           </Route>
         </Routes>
       </BrowserRouter>

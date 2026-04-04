@@ -12,6 +12,7 @@ import { CustomerStatementPrint } from './templates/CustomerStatementPrint';
 import { CollectionsPrint } from './templates/CollectionsPrint';
 import { InvoicePrint } from './templates/InvoicePrint';
 import { ReturnPrint } from './templates/ReturnPrint';
+import { SalesVolumePrint } from './templates/SalesVolumePrint';
 
 import { listUsers } from '../../api/users';
 import { customersApi } from '../../api/customers';
@@ -38,6 +39,8 @@ export default function ReportsDashboard() {
   const [selectedItem, setSelectedItem] = useState<string>('');
   const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [systemNumber, setSystemNumber] = useState<string>('');
+  const [year, setYear] = useState<string>(new Date().getFullYear().toString());
+  const [month, setMonth] = useState<string>('');
 
   // Dropdown lists
   const [sellers, setSellers] = useState<any[]>([]);
@@ -114,6 +117,9 @@ export default function ReportsDashboard() {
             systemNumber
           });
           break;
+        case 'SALES_VOLUME':
+          res = await reportsApi.getSalesVolume({ year: Number(year), month: month ? Number(month) : undefined });
+          break;
         default:
           res = [];
       }
@@ -128,6 +134,60 @@ export default function ReportsDashboard() {
 
   const renderGridData = () => {
     if (!data) return null;
+    
+    // Diseño especial para la grilla de Volumen de Ventas (Top 10 y Desglose)
+    if (activeReportId === 'SALES_VOLUME') {
+      if (!data.summary || data.breakdown.length === 0) return <p className="text-gray-400 p-4">No hay datos en grilla para este filtro.</p>;
+      return (
+        <div className="flex flex-col gap-6 bg-slate-900/50 p-6">
+          <div>
+            <h3 className="px-4 py-2 text-lg font-bold text-white border-b border-slate-700">Top 10 Productos Vendidos</h3>
+            <table className="w-full text-sm text-left font-mono mt-2">
+              <thead className="text-xs uppercase text-slate-400 border-b border-slate-700">
+                <tr>
+                  <th className="px-4 py-3">SKU</th>
+                  <th className="px-4 py-3">Producto</th>
+                  <th className="px-4 py-3 text-right">Cant. Vendida</th>
+                  <th className="px-4 py-3 text-right">Ingresos</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700/50">
+                {data.topProducts.map((row: any, i: number) => (
+                  <tr key={i} className="hover:bg-slate-800/50 transition-colors">
+                    <td className="px-4 py-3 text-slate-300">{row.sku}</td>
+                    <td className="px-4 py-3 text-slate-300 font-semibold">{row.name}</td>
+                    <td className="px-4 py-3 text-right text-indigo-400 font-bold">{row.quantity}</td>
+                    <td className="px-4 py-3 text-right text-emerald-400">${Number(row.revenue).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3 className="px-4 py-2 text-lg font-bold text-white border-b border-slate-700">Desglose de Ingresos ({data.summary.periodLabel})</h3>
+            <table className="w-full text-sm text-left font-mono mt-2">
+              <thead className="text-xs uppercase text-slate-400 border-b border-slate-700">
+                <tr>
+                  <th className="px-4 py-3">Periodo</th>
+                  <th className="px-4 py-3 text-right">No. Ventas</th>
+                  <th className="px-4 py-3 text-right">Ingresos</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700/50">
+                {data.breakdown.map((row: any, i: number) => (
+                  <tr key={i} className="hover:bg-slate-800/50 transition-colors">
+                    <td className="px-4 py-3 text-slate-300 font-semibold">{row.period}</td>
+                    <td className="px-4 py-3 text-right text-slate-300">{row.salesCount}</td>
+                    <td className="px-4 py-3 text-right text-emerald-400">${Number(row.revenue).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
     let arrayData = Array.isArray(data) ? data : data.statement || [];
     if (activeReportId === 'SALES_BY_SELLER') {
       arrayData = data.flatMap((seller:any) => seller.sales);
@@ -169,6 +229,7 @@ export default function ReportsDashboard() {
       case 'KARDEX': return <InventoryPrint ref={printRef} data={data || []} />; // Adapt InventoryPrint to handle Kardex props if needed, for now we reuse
       case 'INVOICE_REPRINTS': return <InvoicePrint ref={printRef} data={data || []} />;
       case 'RETURN_REPRINTS': return <ReturnPrint ref={printRef} data={data || []} />;
+      case 'SALES_VOLUME': return <SalesVolumePrint ref={printRef} data={data || {}} />;
       default: return <div ref={printRef} className="p-10 text-black bg-white">Plantilla no definida</div>;
     }
   };
@@ -321,6 +382,33 @@ export default function ReportsDashboard() {
                   className="input bg-slate-900 border-slate-700 text-white text-sm" 
                 />
               </div>
+            )}
+
+            {activeReport.requiredFilters.includes('year-month') && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold uppercase text-slate-400">Año</label>
+                  <input type="number" min="2000" max="2100" value={year} onChange={e => setYear(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm w-24" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold uppercase text-slate-400">Mes (Opcional)</label>
+                  <select value={month} onChange={e => setMonth(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm min-w-[150px]">
+                    <option value="">Todo el año</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                  </select>
+                </div>
+              </>
             )}
 
             <div className="flex-1" />
