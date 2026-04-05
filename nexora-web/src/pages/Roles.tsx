@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { rolesApi } from '../api/roles';
 import type { Role } from '../api/roles';
+import { X } from 'lucide-react';
 
 export default function Roles() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -65,75 +66,96 @@ export default function Roles() {
   };
 
   return (
-    <div className="card p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Roles</h1>
-          <p className="text-sm text-slate-300">Gestión de roles de usuario</p>
+    <>
+      <div className="card p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Roles</h1>
+            <p className="text-sm text-slate-300">Gestión de roles de usuario</p>
+          </div>
+          <button className="btn-primary" onClick={() => setShowModal(true)}>
+            + Nuevo rol
+          </button>
         </div>
-        <button className="btn-primary" onClick={() => setShowModal(true)}>
-          + Nuevo rol
-        </button>
-      </div>
 
-      {loading ? (
-        <div>Cargando roles...</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-max text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-800 text-slate-200">
-                <th className="px-4 py-3">Nombre</th>
-                <th className="px-4 py-3">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {roles.length === 0 ? (
-                <tr>
-                  <td colSpan={2} className="px-4 py-4 text-center text-slate-400">
-                    No hay roles definidos
-                  </td>
+        {loading ? (
+          <div className="flex items-center justify-center h-32 text-slate-500 animate-pulse text-sm tracking-widest">CARGANDO ROLES...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-max text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-800/50 text-slate-200">
+                  <th className="px-6 py-3 rounded-l-xl text-xs uppercase tracking-wider font-bold">Nombre</th>
+                  <th className="px-6 py-3 rounded-r-xl text-xs uppercase tracking-wider font-bold text-right">Acciones</th>
                 </tr>
-              ) : (
-                roles.map((role) => (
-                  <tr key={role.id} className="hover:bg-slate-800/40">
-                    <td className="px-4 py-3">{role.name}</td>
-                    <td className="px-4 py-3">
-                      <button className="btn-soft mr-2" onClick={() => handleEdit(role)}>
-                        Editar
-                      </button>
-                      <button className="btn-danger" onClick={() => handleDelete(role.id)}>
-                        Eliminar
-                      </button>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {roles.length === 0 ? (
+                  <tr>
+                    <td colSpan={2} className="px-6 py-12 text-center text-slate-500 italic">
+                      No hay roles definidos en el sistema
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                ) : (
+                  roles.map((role) => (
+                    <tr key={role.id} className="hover:bg-slate-800/40 transition-colors group">
+                      <td className="px-6 py-4 text-slate-300 font-medium">{role.name}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="btn-soft px-3 py-1 text-[10px] mr-2" onClick={() => handleEdit(role)}>
+                          EDITAR
+                        </button>
+                        <button className="btn-danger px-3 py-1 text-[10px]" onClick={() => handleDelete(role.id)}>
+                          ELIMINAR
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      {error && <div className="mt-4 text-rose-300">{error}</div>}
+        {error && <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl animate-in shake duration-300">{error}</div>}
+      </div>
 
+      {/* Modal - NEXORA POP-OUT STYLE */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-950 rounded-2xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">
-              {editingRole ? 'Editar rol' : 'Nuevo rol'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <input
-                className="input w-full"
-                placeholder="Nombre del rol"
-                value={roleName}
-                onChange={(e) => setRoleName(e.target.value)}
-              />
-              {error && <div className="text-xs text-rose-300">{error}</div>}
-              <div className="flex justify-end gap-2">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-8 w-full max-w-md shadow-[0_0_50px_-12px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  {editingRole ? 'Editar Rol' : 'Nuevo Rol'}
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">Define el nombre del perfil de acceso.</p>
+              </div>
+              <button 
+                onClick={() => { setShowModal(false); setEditingRole(null); setRoleName(''); setError(''); }} 
+                className="text-slate-500 hover:text-white transition-colors p-2 hover:bg-slate-900 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Nombre del Rol *</label>
+                <input
+                  className="input w-full bg-slate-900 border-slate-700 text-slate-200 focus:ring-indigo-500/20"
+                  placeholder="Ej: Administrador, Cajero, etc."
+                  value={roleName}
+                  onChange={(e) => setRoleName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              {error && <div className="p-3 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl text-xs">{error}</div>}
+
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  className="btn-soft"
+                  className="btn-soft flex-1 py-3 text-slate-400 font-bold tracking-widest text-[10px]"
                   onClick={() => {
                     setShowModal(false);
                     setEditingRole(null);
@@ -141,16 +163,16 @@ export default function Roles() {
                     setError('');
                   }}
                 >
-                  Cancelar
+                  CANCELAR
                 </button>
-                <button type="submit" className="btn-primary">
-                  {editingRole ? 'Actualizar' : 'Crear'}
+                <button type="submit" className="btn-primary flex-1 py-3 font-bold tracking-widest text-[10px] shadow-lg shadow-indigo-500/25">
+                  {editingRole ? 'ACTUALIZAR' : 'CREAR ROL'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

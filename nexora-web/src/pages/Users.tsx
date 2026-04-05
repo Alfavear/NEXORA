@@ -111,54 +111,115 @@ export default function Users() {
   }
 
   return (
-    <div className="card p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Usuarios</h1>
-          <p className="text-sm text-slate-300">Gestión de usuarios multi-sede</p>
+    <>
+      <div className="card p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Usuarios</h1>
+            <p className="text-sm text-slate-300">Gestión de usuarios multi-sede</p>
+          </div>
+
+          <button 
+            className="btn-primary" 
+            onClick={handleOpenModal}
+          >
+            + Crear usuario
+          </button>
         </div>
 
-        <button 
-          className="btn-primary" 
-          onClick={handleOpenModal}
-        >
-          + Crear usuario
-        </button>
+        {loading ? (
+          <div className="mt-6 text-slate-500">Cargando usuarios...</div>
+        ) : (
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="bg-slate-800 text-slate-200 text-sm">
+                  <th className="px-4 py-3 rounded-l-xl">ID</th>
+                  <th className="px-4 py-3">Nombre</th>
+                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Rol</th>
+                  <th className="px-4 py-3">Sedes</th>
+                  <th className="px-4 py-3 rounded-r-xl">Estado</th>
+                </tr>
+              </thead>
+
+              <tbody className="text-sm">
+                {users.map((u) => (
+                  <tr
+                    key={u.id}
+                    className="border-b border-slate-800/50 hover:bg-slate-800/40 transition"
+                  >
+                    <td className="px-4 py-3 font-medium">{u.id}</td>
+                    <td className="px-4 py-3">{u.name}</td>
+                    <td className="px-4 py-3 text-slate-400">{u.email}</td>
+                    <td className="px-4 py-3">
+                      <span className="pill-indigo">{u.role.name}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-2">
+                        {u.userBranches.map((b) => (
+                          <span
+                            key={b.branchId}
+                            className="pill bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                          >
+                            {b.branch.name}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {u.isActive ? (
+                        <span className="pill-emerald">Activo</span>
+                      ) : (
+                        <span className="pill bg-rose-500/10 text-rose-400 border border-rose-500/20">Inactivo</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* MODAL DE CREACIÓN - NEXORA STYLE */}
+      {/* MODAL DE CREACIÓN - NEXORA POP-OUT STYLE */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-slate-950 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-800 animate-in zoom-in-95 duration-200">
-            <h2 className="text-xl font-bold mb-4 text-white">Nuevo Usuario</h2>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-slate-950 rounded-2xl p-8 w-full max-w-lg shadow-[0_0_50px_-12px_rgba(0,0,0,0.8)] border border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="mb-6 border-b border-slate-800 pb-4">
+              <h2 className="text-2xl font-bold text-white">Nuevo Usuario</h2>
+              <p className="text-xs text-slate-400 mt-1">Define las credenciales y accesos del nuevo miembro.</p>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">Nombre Completo</label>
-                <input
-                  type="text"
-                  required
-                  className="input w-full bg-slate-900 border-slate-700 text-white"
-                  placeholder="Ej: Juan Pérez"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Nombre Completo</label>
+                  <input
+                    type="text"
+                    required
+                    className="input w-full bg-slate-900 border-slate-700 text-white"
+                    placeholder="Ej: Juan Pérez"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Email Corporativo</label>
+                  <input
+                    type="email"
+                    required
+                    className="input w-full bg-slate-900 border-slate-700 text-white"
+                    placeholder="juan@nexora.com"
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">Email Corporativo</label>
-                <input
-                  type="email"
-                  required
-                  className="input w-full bg-slate-900 border-slate-700 text-white"
-                  placeholder="juan@nexora.com"
-                  value={formData.email}
-                  onChange={e => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">Contraseña Temporal</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Contraseña Temporal</label>
                 <input
                   type="password"
                   required
@@ -170,14 +231,14 @@ export default function Users() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">Asignar Sedes</label>
-                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1 custom-scrollbar">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Asignar Sedes</label>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 bg-slate-900/50 rounded-xl border border-slate-800 custom-scrollbar">
                   {availableBranches.map(b => (
                     <button
                       key={b.id}
                       type="button"
                       onClick={() => toggleBranch(b.id)}
-                      className={`pill transition-all whitespace-nowrap ${
+                      className={`pill transition-all whitespace-nowrap text-[10px] py-1.5 px-3 border ${
                         formData.branchIds.includes(b.id)
                           ? "bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-600/20"
                           : "bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500"
@@ -198,78 +259,24 @@ export default function Users() {
               <div className="flex gap-3 pt-6">
                 <button
                   type="button"
-                  className="btn-soft flex-1 py-3"
+                  className="btn-soft flex-1 py-3 text-slate-400"
                   onClick={() => setShowModal(false)}
                   disabled={isSubmitting}
                 >
-                  Cancelar
+                  CANCELAR
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary flex-1 py-3 font-semibold"
+                  className="btn-primary flex-1 py-3 font-bold tracking-wide shadow-lg shadow-indigo-500/20"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Procesando..." : "Crear Usuario"}
+                  {isSubmitting ? "PROCESANDO..." : "CREAR USUARIO"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      {loading ? (
-        <div className="mt-6 text-slate-500">Cargando usuarios...</div>
-      ) : (
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="bg-slate-800 text-slate-200 text-sm">
-                <th className="px-4 py-3 rounded-l-xl">ID</th>
-                <th className="px-4 py-3">Nombre</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Rol</th>
-                <th className="px-4 py-3">Sedes</th>
-                <th className="px-4 py-3 rounded-r-xl">Estado</th>
-              </tr>
-            </thead>
-
-            <tbody className="text-sm">
-              {users.map((u) => (
-                <tr
-                  key={u.id}
-                  className="border-b border-slate-800/50 hover:bg-slate-800/40 transition"
-                >
-                  <td className="px-4 py-3 font-medium">{u.id}</td>
-                  <td className="px-4 py-3">{u.name}</td>
-                  <td className="px-4 py-3 text-slate-600">{u.email}</td>
-                  <td className="px-4 py-3">
-                    <span className="pill-indigo">{u.role.name}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      {u.userBranches.map((b) => (
-                        <span
-                          key={b.branchId}
-                          className="pill bg-indigo-100 text-indigo-800"
-                        >
-                          {b.branch.name}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    {u.isActive ? (
-                      <span className="pill-emerald">Activo</span>
-                    ) : (
-                      <span className="pill bg-rose-500/10 text-rose-400 border border-rose-500/20">Inactivo</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
