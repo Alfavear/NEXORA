@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { listUsers } from "../api/users";
+import { listUsers, createUser } from "../api/users";
 import { useAuth } from "../auth/AuthContext";
+import { branchesApi, Branch } from "../api/branches";
 
 type UserRow = {
   id: number;
@@ -19,15 +20,81 @@ export default function Users() {
   const { me } = useAuth();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Estados para el Modal de Creación
+  const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [availableBranches, setAvailableBranches] = useState<Branch[]>([]);
+  
+  // Campos del Formulario
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    branchIds: [] as number[],
+  });
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [usersData, branchesData] = await Promise.all([
+        listUsers(),
+        branchesApi.list().then(res => res.data)
+      ]);
+      setUsers(usersData);
+      setAvailableBranches(branchesData);
+    } catch (err) {
+      console.error("Error cargando datos:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (me?.role === "ADMIN") {
-      listUsers().then((data) => {
-        setUsers(data);
-        setLoading(false);
-      });
+      fetchData();
     }
   }, [me]);
+
+  const handleOpenModal = () => {
+    setFormData({ name: "", email: "", password: "", branchIds: [] });
+    setError("");
+    setShowModal(true);
+  };
+
+  const toggleBranch = (id: number) => {
+    setFormData(prev => ({
+      ...prev,
+      branchIds: prev.branchIds.includes(id)
+        ? prev.branchIds.filter(bid => bid !== id)
+        : [...prev.branchIds, id]
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.branchIds.length === 0) {
+      setError("Debes seleccionar al menos una sede");
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError("");
+    try {
+      await createUser(formData);
+      setShowModal(false);
+      await fetchData(); // recargar lista
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Error al crear el usuario");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!me) return <div className="p-6">Cargando...</div>;
 
@@ -50,8 +117,105 @@ export default function Users() {
           <p className="text-sm text-slate-500">Gestión de usuarios multi-sede</p>
         </div>
 
-        <button className="btn-primary">+ Crear usuario</button>
+        <button 
+          className="btn-primary" 
+          onClick={handleOpenModal}
+        >
+          + Crear usuario
+        </button>
       </div>
+
+      {/* MODAL DE CREACIÓN */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all animate-in fade-in duration-300">
+          <div className="card w-full max-w-lg p-8 shadow-2xl border-white/20 animate-in zoom-in-95 duration-200">
+            <h2 className="text-xl font-bold mb-1">Nuevo Usuario</h2>
+            <p className="text-sm text-slate-500 mb-6">Completa los datos para el nuevo vendedor</p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="label block mb-1">Nombre Completo</label>
+                <input
+                  type="text"
+                  required
+                  className="input"
+                  placeholder="Ej: Juan Pérez"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="label block mb-1">Email</label>
+                <input
+                  type="email"
+                  required
+                  className="input"
+                  placeholder="juan@nexora.com"
+                  value={formData.email}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="label block mb-1">Contraseña</label>
+                <input
+                  type="password"
+                  required
+                  className="input"
+                  placeholder="Mínimo 6 caracteres"
+                  value={formData.password}
+                  onChange={e => setFormData({ ...formData, password: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="label block mb-1">Asignar Sedes</label>
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
+                  {availableBranches.map(b => (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => toggleBranch(b.id)}
+                      className={`pill transition-all ${
+                        formData.branchIds.includes(b.id)
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "bg-slate-100 text-slate-600 border-slate-200 hover:border-indigo-300"
+                      }`}
+                    >
+                      {b.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-sm animate-in shake duration-300">
+                  {Array.isArray(error) ? error.join(", ") : error}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  className="btn-soft flex-1"
+                  onClick={() => setShowModal(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary flex-1"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Guardando..." : "Crear Usuario"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="mt-6 text-slate-500">Cargando usuarios...</div>
