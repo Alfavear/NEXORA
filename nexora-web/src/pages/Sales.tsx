@@ -40,20 +40,31 @@ export default function Sales() {
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentMethodId, setPaymentMethodId] = useState<number>(0);
   const [paymentNotes, setPaymentNotes] = useState('');
+  
   const [loading, setLoading] = useState(false);
   const [saleToPrint, setSaleToPrint] = useState<any>(null);
-  
-  const printRef = useRef(null);
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: 'Ticket_Venta'
-  });
   const [message, setMessage] = useState<string | null>(null);
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [taxes, setTaxes] = useState<any[]>([]);
   const [selectedTaxIds, setSelectedTaxIds] = useState<number[]>([]);
   const [payments, setPayments] = useState<{ paymentMethodId: number; amount: number }[]>([]);
+
+  // 🆕 Estados para Creación Rápida de Clientes
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [customerData, setCustomerData] = useState({ 
+    name: '', 
+    document: '', 
+    phone: '', 
+    email: '', 
+    address: '' 
+  });
+
+  const printRef = useRef(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: 'Ticket_Venta'
+  });
 
   useEffect(() => {
     itemsApi.list().then((r: any) => setItems(r.data ?? r));
@@ -267,6 +278,32 @@ export default function Sales() {
     }
   };
 
+  const createQuickCustomer = async () => {
+    if (!customerData.name) {
+      setMessage('El nombre del cliente es obligatorio.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await customersApi.create(customerData);
+      const created = res.data || res;
+      
+      // Actualizar lista local de clientes
+      setCustomers(prev => [...prev, created]);
+      // Autoseleccionar nuevo cliente
+      setSelectedCustomer(created.id);
+      // Cerrar modal y limpiar
+      setShowCustomerModal(false);
+      setCustomerData({ name: '', document: '', phone: '', email: '', address: '' });
+      setMessage(`Cliente ${created.name} creado y seleccionado.`);
+    } catch (err: any) {
+      setMessage(err.response?.data?.message || 'Error al crear cliente rápidamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadCreditSale = async (saleId: number) => {
     try {
       const res = await salesApi.get(saleId);
@@ -335,6 +372,7 @@ export default function Sales() {
   };
 
   return (
+    <>
     <div className="p-2 md:p-4 space-y-4 md:space-y-6 text-slate-100">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
         <h1 className="text-2xl md:text-3xl font-bold">Facturación y POS</h1>
@@ -366,21 +404,27 @@ export default function Sales() {
         {/* LEFT COLUMN: PARAMS (MOVED TO BOTTOM ON MOBILE VIA ORDER) */}
         <div className="card p-4 md:p-5 order-2 lg:order-1 flex flex-col gap-1">
           <h2 className="text-xl font-semibold mb-3">Cliente y parámetros</h2>
-          <label className="block mb-2">
-            Cliente
-            <select
-              className="input mt-1 bg-white text-black"
-              value={selectedCustomer ?? ''}
-              onChange={(e) => setSelectedCustomer(Number(e.target.value) || null)}
+          <div className="flex justify-between items-end mb-2">
+            <label className="text-sm text-slate-300">Cliente</label>
+            <button 
+              onClick={() => setShowCustomerModal(true)} 
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
             >
-              <option value="">Cliente genérico</option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </option>
-              ))}
-            </select>
-          </label>
+              + Nuevo Cliente
+            </button>
+          </div>
+          <select
+            className="input bg-white text-black w-full"
+            value={selectedCustomer ?? ''}
+            onChange={(e) => setSelectedCustomer(Number(e.target.value) || null)}
+          >
+            <option value="">Cliente genérico</option>
+            {customers.map((customer) => (
+              <option key={customer.id} value={customer.id}>
+                {customer.name}
+              </option>
+            ))}
+          </select>
           <label className="block mb-2">
             Recibo / factura (opcional)
             <input
@@ -928,5 +972,103 @@ export default function Sales() {
       )}
 
     </div>
+
+      {/* 🆕 MINI MODAL CLIENTE - NEXORA POP-OUT STYLE */}
+      {showCustomerModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-8 w-full max-w-lg shadow-[0_0_50px_-12px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-white">Nuevo Cliente</h2>
+                <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-widest font-semibold font-mono">Registro Integral POS</p>
+              </div>
+              <button 
+                onClick={() => setShowCustomerModal(false)} 
+                className="text-slate-500 hover:text-white transition-colors p-2 hover:bg-slate-900 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                <div className="md:col-span-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Nombre / Razón Social *</label>
+                  <input
+                    type="text"
+                    autoFocus
+                    className="input w-full bg-slate-900 border-slate-700 text-sm"
+                    placeholder="Ej: Nexora Tech S.A."
+                    value={customerData.name}
+                    onChange={e => setCustomerData({ ...customerData, name: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Cédula / RUC</label>
+                  <input
+                    type="text"
+                    className="input w-full bg-slate-900 border-slate-700 text-sm font-mono"
+                    placeholder="179000..."
+                    value={customerData.document}
+                    onChange={e => setCustomerData({ ...customerData, document: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Teléfono</label>
+                  <input
+                    type="text"
+                    className="input w-full bg-slate-900 border-slate-700 text-sm"
+                    placeholder="+00... "
+                    value={customerData.phone}
+                    onChange={e => setCustomerData({ ...customerData, phone: e.target.value })}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Email Facturación</label>
+                  <input
+                    type="email"
+                    className="input w-full bg-slate-900 border-slate-700 text-sm"
+                    placeholder="cliente@ejemplo.com"
+                    value={customerData.email}
+                    onChange={e => setCustomerData({ ...customerData, email: e.target.value })}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Dirección de Entrega / Matriz</label>
+                  <textarea
+                    className="input w-full bg-slate-900 border-slate-700 text-sm h-20 resize-none"
+                    placeholder="Av. Principal, Sector..."
+                    value={customerData.address}
+                    onChange={e => setCustomerData({ ...customerData, address: e.target.value })}
+                    maxLength={200}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowCustomerModal(false)}
+                  className="btn-soft flex-1 py-3 text-xs font-bold"
+                  disabled={loading}
+                >
+                  CANCELAR
+                </button>
+                <button
+                  onClick={createQuickCustomer}
+                  className="btn-primary flex-1 py-3 text-xs font-bold shadow-lg shadow-indigo-500/20"
+                  disabled={loading}
+                >
+                  {loading ? 'CREANDO...' : 'GUARDAR Y SELECCIONAR'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

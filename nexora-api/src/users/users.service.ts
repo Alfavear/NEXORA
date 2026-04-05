@@ -21,10 +21,15 @@ type ReqUser = {
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  // 🔑 usado por AuthService
-  findByEmail(email: string) {
-    return this.prisma.user.findUnique({
-      where: { email },
+  // 🔑 usado por AuthService para login dual
+  findByEmailOrUsername(identifier: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier.trim().toLowerCase() },
+          { username: identifier.trim().toLowerCase() },
+        ],
+      },
       include: { role: true },
     });
   }
@@ -38,17 +43,19 @@ export class UsersService {
     return actor.companyId;
   }
 
-  async createVendedor(dto: CreateUserDto, actor: ReqUser) {
+  async create(dto: CreateUserDto, actor: ReqUser) {
     const companyId = await this.getActorCompanyId(actor.sub);
 
     // email único
-    const exists = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+    const exists = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: dto.email }, { username: dto.username }],
+      },
     });
     if (exists)
-      throw new BadRequestException('Ya existe un usuario con ese email');
+      throw new BadRequestException('Ya existe un usuario con ese email o username');
 
-    // validar que todas las sedes pertenezcan a la empresa
+    // validar que la sede pertenezca a la empresa
     const branches = await this.prisma.branch.findMany({
       where: { id: { in: dto.branchIds }, companyId },
       select: { id: true },
@@ -59,23 +66,27 @@ export class UsersService {
       );
     }
 
-    const vendedorRole = await this.prisma.role.findUnique({
-      where: { name: 'VENDEDOR' },
+    const assignedRole = await this.prisma.role.findUnique({
+      where: { id: dto.roleId },
       select: { id: true },
     });
-    if (!vendedorRole)
-      throw new BadRequestException('No existe el rol VENDEDOR');
+    if (!assignedRole)
+      throw new BadRequestException('El rol asignado no existe');
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
+    
+    // Autogenerar username si no viene en el DTO
+    const finalUsername = (dto.username || dto.email.split('@')[0]).toLowerCase();
 
     const user = await this.prisma.user.create({
       data: {
         name: dto.name,
         email: dto.email,
+        username: finalUsername,
         passwordHash,
         isActive: true,
         companyId,
-        roleId: vendedorRole.id,
+        roleId: assignedRole.id,
         userBranches: {
           create: dto.branchIds.map((branchId) => ({
             branchId,
@@ -87,6 +98,7 @@ export class UsersService {
         id: true,
         name: true,
         email: true,
+        username: true,
         isActive: true,
         createdAt: true,
         role: { select: { name: true } },

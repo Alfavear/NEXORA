@@ -6,6 +6,7 @@ import {
   MinLength,
   ArrayMinSize,
   IsArray,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -16,8 +17,16 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
+  @IsOptional()
+  username?: string;
+
+  @IsString()
   @MinLength(6)
   password: string;
+
+  @IsInt()
+  @Min(1)
+  roleId: number;
 
   @IsArray()
   @ArrayMinSize(1)

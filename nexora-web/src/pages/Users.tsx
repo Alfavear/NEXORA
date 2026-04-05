@@ -3,11 +3,14 @@ import { listUsers, createUser } from "../api/users";
 import { useAuth } from "../auth/AuthContext";
 import { branchesApi } from "../api/branches";
 import type { Branch } from "../api/branches";
+import { rolesApi } from "../api/roles";
+import type { Role } from "../api/roles";
 
 type UserRow = {
   id: number;
   name: string;
   email: string;
+  username: string;
   isActive: boolean;
   role: { name: string };
   userBranches: {
@@ -27,24 +30,29 @@ export default function Users() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [availableBranches, setAvailableBranches] = useState<Branch[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   
   // Campos del Formulario
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    username: "",
     password: "",
+    roleId: 0,
     branchIds: [] as number[],
   });
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usersData, branchesData] = await Promise.all([
+      const [usersData, branchesData, rolesData] = await Promise.all([
         listUsers(),
-        branchesApi.list().then(res => res.data)
+        branchesApi.list().then(res => res.data),
+        rolesApi.list().then(res => res.data)
       ]);
       setUsers(usersData);
       setAvailableBranches(branchesData);
+      setAvailableRoles(rolesData);
     } catch (err) {
       console.error("Error cargando datos:", err);
     } finally {
@@ -59,7 +67,14 @@ export default function Users() {
   }, [me]);
 
   const handleOpenModal = () => {
-    setFormData({ name: "", email: "", password: "", branchIds: [] });
+    setFormData({ 
+      name: "", 
+      email: "", 
+      username: "",
+      password: "", 
+      roleId: availableRoles[0]?.id || 0,
+      branchIds: [] 
+    });
     setError("");
     setShowModal(true);
   };
@@ -75,6 +90,10 @@ export default function Users() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.roleId === 0) {
+      setError("Debes seleccionar un rol");
+      return;
+    }
     if (formData.branchIds.length === 0) {
       setError("Debes seleccionar al menos una sede");
       return;
@@ -206,6 +225,19 @@ export default function Users() {
                 </div>
 
                 <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Username (Opcional)</label>
+                  <input
+                    type="text"
+                    className="input w-full bg-slate-900 border-slate-700 text-white"
+                    placeholder="juan.perez"
+                    value={formData.username}
+                    onChange={e => setFormData({ ...formData, username: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Email Corporativo</label>
                   <input
                     type="email"
@@ -215,6 +247,21 @@ export default function Users() {
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                   />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Rol de Usuario</label>
+                  <select
+                    required
+                    className="input w-full bg-slate-900 border-slate-700 text-white"
+                    value={formData.roleId}
+                    onChange={e => setFormData({ ...formData, roleId: Number(e.target.value) })}
+                  >
+                    <option value={0} disabled>Seleccionar Rol</option>
+                    {availableRoles.map(r => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -232,7 +279,7 @@ export default function Users() {
 
               <div>
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Asignar Sedes</label>
-                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 bg-slate-900/50 rounded-xl border border-slate-800 custom-scrollbar">
+                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-2 bg-slate-900/50 rounded-xl border border-slate-800 custom-scrollbar">
                   {availableBranches.map(b => (
                     <button
                       key={b.id}

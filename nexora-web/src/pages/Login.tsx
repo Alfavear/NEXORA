@@ -7,7 +7,7 @@ export default function Login() {
   const { login, me, switchBranch } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string>("");
 
@@ -23,8 +23,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // ✅ Opción A: login sin branchId
-      await login(email, password);
+      // ✅ login con identificador unificado (email o username)
+      await login(identifier, password);
 
       // obtener datos actualizados inmediatamente
       const userData = await AuthAPI.me();
@@ -77,13 +77,13 @@ export default function Login() {
         {step === "LOGIN" && (
           <form onSubmit={handleLogin} className="mt-6 space-y-4">
             <div>
-              <div className="label mb-1">Email</div>
+              <div className="label mb-1">Email o Usuario</div>
               <input
-                type="email"
+                type="text"
                 className="input"
-                placeholder="Ingresa tu correo"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="juan@nexora.com o juan.perez"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
 

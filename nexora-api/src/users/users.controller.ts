@@ -25,7 +25,7 @@ export class UsersController {
 
   @Post()
   create(@Body() dto: CreateUserDto, @Request() req: any) {
-    return this.usersService.createVendedor(dto, req.user);
+    return this.usersService.create(dto, req.user);
   }
 
   @Get()

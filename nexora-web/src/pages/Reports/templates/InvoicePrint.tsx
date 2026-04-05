@@ -9,9 +9,27 @@ export const InvoicePrint = forwardRef<HTMLDivElement, { data: any[] }>(({ data 
     );
   }
 
-  // Si hay varias facturas en la búsqueda, las imprimimos una tras otra con un page break
+  // Detectamos si hay facturas de 80mm (contado) para ajustar el papel
+  const hasTicket = data.some(s => !s.isCredit);
+
   return (
     <div ref={ref} className="bg-transparent">
+      {/* Estilos dinámicos para el tamaño del papel en impresoras térmicas vs A4 */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page {
+            size: ${hasTicket ? '80mm auto' : 'A4'};
+            margin: 0;
+          }
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact;
+          }
+          .no-print { display: none !important; }
+        }
+      `}} />
+
       {data.map((sale, idx) => {
         const isCredit = Boolean(sale.isCredit);
         const pageBreak = { pageBreakAfter: idx < data.length - 1 ? 'always' : 'auto' } as any;
@@ -160,83 +178,105 @@ export const InvoicePrint = forwardRef<HTMLDivElement, { data: any[] }>(({ data 
           );
         }
 
-        // FORMATO ORIGINAL 80MM PARA CONTADO
+        // FORMATO REDISEÑADO 80MM "NEXORA ELITE" PARA CONTADO
         return (
-          <div key={sale.id} className="bg-white text-black text-[11px] font-mono leading-tight w-[80mm] max-w-full mx-auto p-4 flex flex-col" style={pageBreak}>
-            {/* Header */}
-            <div className="text-center mb-4 border-b border-dashed border-gray-400 pb-4">
-              {(sale.branch as any)?.logoUrl && (
-                <img src={(sale.branch as any).logoUrl} alt="Logo Sede" className="w-20 h-20 mx-auto mb-2 object-contain grayscale" />
+          <div key={sale.id} className="bg-white text-black text-[11px] font-sans leading-relaxed w-[80mm] max-w-full mx-auto p-5 flex flex-col shadow-sm border border-gray-100" style={pageBreak}>
+            {/* Logo y Sede */}
+            <div className="text-center mb-5">
+              {(sale.branch as any)?.logoUrl ? (
+                <img src={(sale.branch as any).logoUrl} alt="Sede Logo" className="w-16 h-16 mx-auto mb-3 object-contain grayscale" />
+              ) : (
+                <div className="text-2xl font-black tracking-tighter mb-1 select-none">NEXORA</div>
               )}
-              <h1 className="text-xl font-bold mb-1 uppercase tracking-wider">{sale.branch?.name || sale.company?.name || 'SUCURSAL'}</h1>
-              <p>RUC: {sale.company?.ruc || '0000000000001'}</p>
-              <p>{sale.branch?.address || 'Dirección no especificada'}</p>
-              <p>Telf: {sale.branch?.phone || ''}</p>
-              
-              <div className="mt-4 text-left space-y-1">
-                <p><span className="font-semibold">FACTURA N°:</span> {sale.systemNumber}</p>
-                <p><span className="font-semibold">FECHA:</span> {new Date(sale.createdAt).toLocaleString()}</p>
-                <p><span className="font-semibold">CLIENTE:</span> {sale.customer?.name || 'CONSUMIDOR FINAL'}</p>
-                <p><span className="font-semibold">RUC/DNI:</span> {sale.customer?.document || '9999999999999'}</p>
-                <p><span className="font-semibold">VENDEDOR:</span> {sale.seller?.name || 'N/A'}</p>
+              <h1 className="text-lg font-black uppercase tracking-tight leading-none mb-2">{sale.branch?.name || sale.company?.name || 'CENTRO MATRIZ'}</h1>
+              <div className="text-[10px] space-y-0.5 opacity-80 uppercase font-medium">
+                <p>RUC: {sale.company?.ruc || '0000000000001'}</p>
+                <p className="px-2">{sale.branch?.address || 'Sucursal Principal'}</p>
+                <p>Tel: {sale.branch?.phone || '---'}</p>
               </div>
             </div>
 
-            {/* Table */}
-            <table className="w-full mb-4">
+            {/* Ficha de Documento */}
+            <div className="border-y-2 border-black py-3 mb-5 space-y-1.5 bg-gray-50/50">
+              <div className="flex justify-between items-center px-1">
+                <span className="font-bold text-xs">FACTURA N°:</span>
+                <span className="font-mono font-black text-sm">{sale.systemNumber}</span>
+              </div>
+              <div className="flex justify-between px-1 text-[10px]">
+                <span>FECHA EMISIÓN:</span>
+                <span className="font-semibold">{new Date(sale.createdAt).toLocaleString()}</span>
+              </div>
+              <div className="px-1 pt-2 border-t border-gray-200 mt-2">
+                <p className="font-bold text-[10px] text-gray-500 uppercase tracking-widest mb-0.5">Cliente:</p>
+                <p className="text-xs font-black uppercase">{sale.customer?.name || 'CONSUMIDOR FINAL'}</p>
+                <p className="text-[10px] font-mono tracking-wider opacity-70">ID/RUC: {sale.customer?.document || '9999999999999'}</p>
+              </div>
+              <div className="px-1 text-[9px] opacity-60 italic">Atendido por: {sale.seller?.name || 'Sistema'}</div>
+            </div>
+
+            {/* Tabla de Artículos */}
+            <table className="w-full mb-5 border-collapse">
               <thead>
-                <tr className="border-b border-dashed border-gray-400 text-left">
-                  <th className="py-1 w-[15%]">CANT</th>
-                  <th className="py-1 w-[50%]">DESCRIPCIÓN</th>
-                  <th className="py-1 w-[15%] text-right">P.U</th>
-                  <th className="py-1 w-[20%] text-right">TOTAL</th>
+                <tr className="border-b-2 border-black text-[10px] uppercase font-black tracking-tighter">
+                  <th className="py-1.5 text-left w-10">CANT</th>
+                  <th className="py-1.5 text-left">PRODUCTO</th>
+                  <th className="py-1.5 text-right w-16">TOTAL</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {sale.details?.map((detail: any, i: number) => (
-                  <tr key={i} className="border-b border-dashed border-gray-200">
-                    <td className="py-1 align-top">{Number(detail.quantity).toString()}</td>
-                    <td className="py-1 break-words pr-1">
-                      {detail.item?.name}
-                      {detail.isGift && <span className="block text-[9px]">(REGALO)</span>}
+                  <tr key={i}>
+                    <td className="py-2 align-top text-center font-bold text-gray-600">{Number(detail.quantity).toString()}</td>
+                    <td className="py-2 pr-2">
+                      <div className="font-bold text-[10px] uppercase leading-tight">{detail.item?.name}</div>
+                      <div className="text-[9px] text-gray-500 font-mono">PU: ${Number(detail.unitPrice).toFixed(2)}</div>
+                      {detail.isGift && <span className="inline-block px-1 bg-gray-100 text-[8px] font-bold rounded">REGALO</span>}
                     </td>
-                    <td className="py-1 align-top text-right">${Number(detail.unitPrice).toFixed(2)}</td>
-                    <td className="py-1 align-top text-right font-semibold">${Number(detail.subtotal).toFixed(2)}</td>
+                    <td className="py-2 align-top text-right font-mono font-bold text-xs">${Number(detail.subtotal).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* Totals */}
-            <div className="flex flex-col items-end border-b border-dashed border-gray-400 pb-4 mb-4 space-y-1">
-              <div className="flex justify-between w-1/2 min-w-[120px]">
-                <span>SUBTOTAL:</span>
-                <span>${Number(sale.subtotal).toFixed(2)}</span>
+            {/* Bloque de Totales */}
+            <div className="flex flex-col items-end space-y-1 text-xs border-t-2 border-black pt-4 mb-6">
+              <div className="flex justify-between w-3/4">
+                <span className="font-medium text-gray-500">SUBTOTAL</span>
+                <span className="font-mono font-bold">${Number(sale.subtotal).toFixed(2)}</span>
               </div>
-              {sale.saleTaxes && sale.saleTaxes.length > 0 ? (
-                sale.saleTaxes.map((st: any) => (
-                  <div key={st.taxId} className="flex justify-between w-1/2 min-w-[120px] text-[10px]">
-                    <span>{st.tax?.name} ({Number(st.tax?.rate).toFixed(2)}%):</span>
-                    <span>${(Number(sale.subtotal) * (Number(st.tax?.rate) / 100)).toFixed(2)}</span>
-                  </div>
-                ))
-              ) : Number(sale.tax) > 0 ? (
-                <div className="flex justify-between w-1/2 min-w-[120px] text-[10px]">
-                  <span>IMPUESTOS:</span>
-                  <span>${Number(sale.tax).toFixed(2)}</span>
+              {sale.saleTaxes?.map((st: any) => (
+                <div key={st.taxId} className="flex justify-between w-3/4 text-[10px]">
+                  <span className="text-gray-500 uppercase">{st.tax?.name} ({Number(st.tax?.rate).toFixed(2)}%)</span>
+                  <span className="font-mono">${(Number(sale.subtotal) * (Number(st.tax?.rate) / 100)).toFixed(2)}</span>
                 </div>
-              ) : null}
-              <div className="flex justify-between w-1/2 min-w-[120px] font-bold text-sm mt-1">
-                <span>TOTAL:</span>
-                <span>${Number(sale.total).toFixed(2)}</span>
+              )) || (Number(sale.tax) > 0 && (
+                <div className="flex justify-between w-3/4 text-[10px]">
+                  <span className="text-gray-500 uppercase">IMPUESTOS</span>
+                  <span className="font-mono">${Number(sale.tax).toFixed(2)}</span>
+                </div>
+              ))}
+              
+              <div className="flex justify-between w-full mt-3 p-3 bg-black text-white rounded-sm items-center">
+                <span className="text-xs font-black tracking-widest">TOTAL A PAGAR</span>
+                <span className="text-lg font-black font-mono tracking-tighter">${Number(sale.total).toFixed(2)}</span>
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="text-center text-[10px] space-y-1 mt-auto pt-4">
-              <p>¡GRACIAS POR SU COMPRA!</p>
-              <p>Conserve este ticket para cualquier reclamo o garantía.</p>
-              <p className="mt-4 opacity-50">Generado por el Sistema</p>
+            {/* Footer / Estilo Barcode */}
+            <div className="text-center mt-auto">
+              <div className="mb-4 flex flex-col items-center opacity-40">
+                <div className="w-full flex justify-center h-4 gap-0.5 items-end mb-1">
+                  {[1,3,1,2,5,2,1,4,1,3,1].map((w,i) => <div key={i} className="bg-black" style={{width: `${w}px`, height: '100%'}} />)}
+                  {[2,1,4,2,1,3,2].map((w,i) => <div key={i} className="bg-black" style={{width: `${w}px`, height: '70%'}} />)}
+                </div>
+                <p className="text-[8px] font-mono tracking-widest">{sale.systemNumber}</p>
+              </div>
+              
+              <div className="text-[10px] space-y-1 font-bold text-gray-500 leading-tight">
+                <p>¡GRACIAS POR SU COMPRA!</p>
+                <p className="text-[8px] opacity-70 font-medium">Conserve este comprobante para cambios o devoluciones.</p>
+                <p className="text-[7px] mt-6 opacity-30 uppercase font-mono">Nexora ERP Cloud v2.0</p>
+              </div>
             </div>
           </div>
         );

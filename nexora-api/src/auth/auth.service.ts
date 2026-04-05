@@ -32,11 +32,11 @@ export class AuthService {
     const dbHost = dbUrl.split('@')[1]?.split('/')[0] || 'unknown';
     console.log(`[AUTH] Intento de login para: ${normalizedEmail} en DB: ${dbHost}`);
 
-    const user = await this.usersService.findByEmail(normalizedEmail);
+    const user = await this.usersService.findByEmailOrUsername(normalizedEmail);
     
     if (!user) {
       console.log(`[AUTH] ERROR: Usuario no encontrado (${normalizedEmail})`);
-      throw new UnauthorizedException('EMAIL_NOT_FOUND');
+      throw new UnauthorizedException('USER_NOT_FOUND');
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);

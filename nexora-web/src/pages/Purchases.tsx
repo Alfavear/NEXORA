@@ -4,6 +4,7 @@ import { suppliersApi } from '../api/suppliers';
 import { branchesApi } from '../api/branches';
 import { categoriesApi } from '../api/categories';
 import http from '../api/http';
+import { X } from 'lucide-react';
 
 export default function Purchases() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -23,6 +24,16 @@ export default function Purchases() {
 
   const [showNewItem, setShowNewItem] = useState(false);
   const [newItemData, setNewItemData] = useState({ name: '', sku: '', categoryId: 0, salePrice: 0 });
+
+  // 🆕 Estados para Proveedor Completo en Compras
+  const [showSupplierModal, setShowSupplierModal] = useState(false);
+  const [supplierData, setSupplierData] = useState({ 
+    name: '', 
+    ruc: '',
+    phone: '',
+    email: '',
+    address: ''
+  });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -125,6 +136,37 @@ export default function Purchases() {
     }
   };
 
+  const createQuickSupplier = async () => {
+    if (!supplierData.name) {
+      setMessage('Nombre del proveedor requerido.');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const res = await suppliersApi.create({
+        ...supplierData
+      });
+      const created = res.data || res;
+      setSuppliers(prev => [...prev, created]);
+      // Sincronizar UI
+      setSelectedSupplierId(created.id);
+      setShowSupplierModal(false);
+      setSupplierData({ 
+        name: '', 
+        ruc: '',
+        phone: '',
+        email: '',
+        address: ''
+      });
+      setMessage('Proveedor creado y seleccionado automáticamente.');
+    } catch (err: any) {
+      setMessage(err.response?.data?.message || 'Error al crear proveedor.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const total = cart.reduce((acc, c) => acc + (c.quantity * c.unitCost), 0);
 
   const savePurchase = async () => {
@@ -161,6 +203,7 @@ export default function Purchases() {
   };
 
   return (
+    <>
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold">Ingreso de Compras</h1>
 
@@ -187,7 +230,15 @@ export default function Purchases() {
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Proveedor (Obligatorio)</label>
+            <div className="flex justify-between items-end mb-1">
+              <label className="block text-sm text-slate-400">Proveedor (Obligatorio)</label>
+              <button 
+                onClick={() => setShowSupplierModal(true)} 
+                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+              >
+                + Nuevo Proveedor
+              </button>
+            </div>
             <select 
               className="input w-full"
               value={selectedSupplierId}
@@ -355,5 +406,104 @@ export default function Purchases() {
         </div>
       </div>
     </div>
+
+      {/* 🆕 MINI MODAL PROVEEDOR - NEXORA POP-OUT STYLE */}
+      {showSupplierModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-8 w-full max-w-sm shadow-[0_0_50px_-12px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-white">Nuevo Proveedor</h2>
+                <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-widest font-semibold">Registro Rápido</p>
+              </div>
+              <button 
+                onClick={() => setShowSupplierModal(false)} 
+                className="text-slate-500 hover:text-white transition-colors p-2 hover:bg-slate-900 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Razón Social / Nombre *</label>
+                  <input
+                    type="text"
+                    autoFocus
+                    className="input w-full bg-slate-900 border-slate-700 text-sm"
+                    placeholder="Ej: Inversiones ABC"
+                    value={supplierData.name}
+                    onChange={e => setSupplierData({ ...supplierData, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">RUC / ID</label>
+                  <input
+                    type="text"
+                    className="input w-full bg-slate-900 border-slate-700 text-sm font-mono"
+                    placeholder="179000..."
+                    value={supplierData.ruc}
+                    onChange={e => setSupplierData({ ...supplierData, ruc: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Teléfono</label>
+                  <input
+                    type="text"
+                    className="input w-full bg-slate-900 border-slate-700 text-sm"
+                    placeholder="+00... "
+                    value={supplierData.phone}
+                    onChange={e => setSupplierData({ ...supplierData, phone: e.target.value })}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Email Contacto</label>
+                  <input
+                    type="email"
+                    className="input w-full bg-slate-900 border-slate-700 text-sm"
+                    placeholder="email@empresa.com"
+                    value={supplierData.email}
+                    onChange={e => setSupplierData({ ...supplierData, email: e.target.value })}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Dirección Matriz</label>
+                  <textarea
+                    className="input w-full bg-slate-900 border-slate-700 text-sm h-20 resize-none"
+                    placeholder="Av. Principal, Sector..."
+                    value={supplierData.address}
+                    onChange={e => setSupplierData({ ...supplierData, address: e.target.value })}
+                    maxLength={200}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowSupplierModal(false)}
+                  className="btn-soft flex-1 py-2 text-xs font-bold"
+                  disabled={loading}
+                >
+                  CANCELAR
+                </button>
+                <button
+                  onClick={createQuickSupplier}
+                  className="btn-primary flex-1 py-2 text-xs font-bold shadow-lg shadow-indigo-500/20"
+                  disabled={loading}
+                >
+                  {loading ? 'CREANDO...' : 'GUARDAR'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -4,6 +4,7 @@ export type UserRow = {
   id: number;
   name: string;
   email: string;
+  username: string;
   isActive: boolean;
   createdAt: string;
   role: { name: string };
@@ -13,7 +14,9 @@ export type UserRow = {
 export type CreateUserPayload = {
   name: string;
   email: string;
+  username?: string;
   password: string;
+  roleId: number;
   branchIds: number[];
 };
 

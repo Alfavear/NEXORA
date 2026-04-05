@@ -47,6 +47,7 @@ export class ReportsService {
       subtotal: this.round2((s as any).subtotal),
       tax: this.round2(Number((s as any).total || 0) - Number((s as any).subtotal || 0)),
       total: this.round2((s as any).total),
+      isCredit: s.isCredit,
       status: s.paymentStatus || (s as any).status || 'Desconocido',
       units: this.round2(s.details.reduce((acc, d) => acc + Number(d.quantity || 0), 0)),
       payments: s.payments.map((p) => ({ method: p.paymentMethod?.name || 'Desconocido', amount: this.round2(p.amount) })),

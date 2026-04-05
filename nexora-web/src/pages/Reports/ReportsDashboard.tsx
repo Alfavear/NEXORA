@@ -30,6 +30,7 @@ export default function ReportsDashboard() {
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<any>(null);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
 
   // Filters State
   const [startDate, setStartDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
@@ -67,6 +68,7 @@ export default function ReportsDashboard() {
   const switchReport = (reportId: string) => {
     setActiveReportId(reportId);
     setData(null);
+    setSelectedRecord(null);
   };
 
   const toggleCategory = (categoryId: string) => {
@@ -77,6 +79,7 @@ export default function ReportsDashboard() {
 
   const loadData = async () => {
     setLoading(true);
+    setSelectedRecord(null);
     try {
       let res;
       switch (activeReportId) {
@@ -188,6 +191,112 @@ export default function ReportsDashboard() {
       );
     }
 
+    if (activeReportId === 'GENERAL_SALES') {
+      const records = data || [];
+      if (records.length === 0) return <p className="text-gray-400 p-4">No hay ventas registradas en este periodo.</p>;
+
+      return (
+        <table className="w-full text-sm text-left font-mono">
+          <thead className="text-xs uppercase bg-slate-900 text-slate-400 border-b border-slate-700">
+            <tr>
+              <th className="px-6 py-4">Fecha</th>
+              <th className="px-6 py-4">Documento</th>
+              <th className="px-6 py-4">Tipo</th>
+              <th className="px-6 py-4">Cliente</th>
+              <th className="px-6 py-4 text-right">Subtotal</th>
+              <th className="px-6 py-4 text-right">Impuestos</th>
+              <th className="px-6 py-4 text-right font-bold">Total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-700/50">
+            {records.map((row: any, i: number) => (
+              <tr key={i} className="hover:bg-slate-700/30 transition-colors">
+                <td className="px-6 py-3 whitespace-nowrap text-slate-400 font-medium">
+                  {new Date(row.date || row.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-3 whitespace-nowrap text-white font-bold">{row.documentNumber || row.systemNumber}</td>
+                <td className="px-6 py-3 whitespace-nowrap">
+                  {row.isCredit ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase border border-blue-500/30 bg-blue-500/10 text-blue-400">
+                      Crédito
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                      Contado
+                    </span>
+                  )}
+                </td>
+                <td className="px-6 py-3 text-slate-300">
+                   <div className="font-semibold text-slate-100 uppercase">{row.customerName || row.customer?.name || 'CONSUMIDOR FINAL'}</div>
+                   <div className="text-[10px] text-slate-500">{row.branchName || row.branch?.name || 'SUCURSAL'}</div>
+                </td>
+                <td className="px-6 py-3 text-right text-slate-400">${Number(row.subtotal || 0).toFixed(2)}</td>
+                <td className="px-6 py-3 text-right text-amber-500/80">${Number(row.tax || 0).toFixed(2)}</td>
+                <td className="px-6 py-3 text-right text-emerald-400 font-black">${Number(row.total || 0).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    if (activeReportId === 'INVOICE_REPRINTS' || activeReportId === 'RETURN_REPRINTS') {
+      const records = Array.isArray(data) ? data : data.statement || [];
+      if (records.length === 0) return <p className="text-gray-400 p-4">No hay documentos para este filtro.</p>;
+
+      return (
+        <table className="w-full text-sm text-left font-mono">
+          <thead className="text-xs uppercase bg-slate-900 text-slate-400 border-b border-slate-700">
+            <tr>
+              <th className="px-6 py-4">Fecha</th>
+              <th className="px-6 py-4">N° Documento</th>
+              <th className="px-6 py-4">Tipo</th>
+              <th className="px-6 py-4">Cliente</th>
+              <th className="px-6 py-4 text-right">Subtotal</th>
+              <th className="px-6 py-4 text-right">Impuestos</th>
+              <th className="px-6 py-4 text-right">Total</th>
+              <th className="px-6 py-4 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-700/50">
+            {records.map((row: any, i: number) => (
+              <tr key={i} className={`hover:bg-slate-700/30 transition-colors ${selectedRecord?.id === row.id ? 'bg-indigo-500/10' : ''}`}>
+                <td className="px-6 py-3 whitespace-nowrap text-slate-400">{new Date(row.createdAt).toLocaleDateString()}</td>
+                <td className="px-6 py-3 whitespace-nowrap text-white font-bold">{row.systemNumber}</td>
+                <td className="px-6 py-3 whitespace-nowrap">
+                  {row.isCredit ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase border border-blue-500/30 bg-blue-500/10 text-blue-400">
+                      Crédito
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                      Contado
+                    </span>
+                  )}
+                </td>
+                <td className="px-6 py-3 text-slate-300">
+                   <div className="font-semibold text-slate-100">{row.customer?.name || 'Consumidor Final'}</div>
+                   <div className="text-[10px] text-slate-500 uppercase">{row.customer?.document || '---'}</div>
+                </td>
+                <td className="px-6 py-3 text-right text-slate-400">${Number(row.subtotal).toFixed(2)}</td>
+                <td className="px-6 py-3 text-right text-amber-500/80">${Number(row.tax || 0).toFixed(2)}</td>
+                <td className="px-6 py-3 text-right text-emerald-400 font-bold">${Number(row.total).toFixed(2)}</td>
+                <td className="px-6 py-3 text-center">
+                  <button 
+                    onClick={() => { setSelectedRecord(row); setActiveTab('PRINT'); }}
+                    className="p-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg transition-all border border-indigo-500/20 group"
+                    title="Visualizar para Imprimir"
+                  >
+                    <Search className="w-4 h-4 group-hover:scale-110" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
     let arrayData = Array.isArray(data) ? data : data.statement || [];
     if (activeReportId === 'SALES_BY_SELLER') {
       arrayData = data.flatMap((seller:any) => seller.sales);
@@ -221,14 +330,16 @@ export default function ReportsDashboard() {
 
   const renderPrintTemplate = () => {
     const filtersUsed = { startDate, endDate, selectedSeller, selectedCustomer, selectedItem, selectedBranch };
+    const printData = selectedRecord ? [selectedRecord] : (data || []);
+    
     switch (activeReportId) {
-      case 'GENERAL_SALES': return <SalesPrint ref={printRef} data={data || []} filters={filtersUsed} />;
-      case 'SALES_BY_SELLER': return <SalesBySellerPrint ref={printRef} data={data || []} filters={filtersUsed} />;
+      case 'GENERAL_SALES': return <SalesPrint ref={printRef} data={printData} filters={filtersUsed} />;
+      case 'SALES_BY_SELLER': return <SalesBySellerPrint ref={printRef} data={printData} filters={filtersUsed} />;
       case 'CUSTOMER_STATEMENT': return <CustomerStatementPrint ref={printRef} data={data || {}} filters={filtersUsed} />;
-      case 'COLLECTIONS': return <CollectionsPrint ref={printRef} data={data || []} filters={filtersUsed} />;
-      case 'KARDEX': return <InventoryPrint ref={printRef} data={data || []} />; // Adapt InventoryPrint to handle Kardex props if needed, for now we reuse
-      case 'INVOICE_REPRINTS': return <InvoicePrint ref={printRef} data={data || []} />;
-      case 'RETURN_REPRINTS': return <ReturnPrint ref={printRef} data={data || []} />;
+      case 'COLLECTIONS': return <CollectionsPrint ref={printRef} data={printData} filters={filtersUsed} />;
+      case 'KARDEX': return <InventoryPrint ref={printRef} data={printData} />;
+      case 'INVOICE_REPRINTS': return <InvoicePrint ref={printRef} data={printData} />;
+      case 'RETURN_REPRINTS': return <ReturnPrint ref={printRef} data={printData} />;
       case 'SALES_VOLUME': return <SalesVolumePrint ref={printRef} data={data || {}} />;
       default: return <div ref={printRef} className="p-10 text-black bg-white">Plantilla no definida</div>;
     }
@@ -285,8 +396,8 @@ export default function ReportsDashboard() {
 
       {/* Área Principal */}
       <div className="flex-1 flex flex-col bg-[#0F172A] relative">
-        <div className="p-6 pb-4 border-b border-slate-700/50 bg-[#0F172A]/50 backdrop-blur-sm z-10 sticky top-0">
-          <div className="flex items-center justify-between mb-6">
+        <div className="p-4 pb-3 border-b border-slate-700/50 bg-[#0F172A]/90 backdrop-blur-sm z-10 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold text-white flex items-center gap-3">
               <activeReport.icon className="w-6 h-6 text-indigo-400" />
               {activeReport.title}
@@ -312,10 +423,10 @@ export default function ReportsDashboard() {
             </div>
           </div>
 
-          {/* Dynamic Filters */}
-          <div className="flex flex-wrap gap-4 items-end bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
-            <div className="flex items-center gap-2 px-2 border-r border-slate-700 mr-2 text-slate-500">
-              <Filter className="w-5 h-5" />
+          {/* Dynamic Filters Compacted */}
+          <div className="flex flex-wrap gap-3 items-end bg-slate-800/30 p-3 rounded-xl border border-slate-700/50 shadow-sm">
+            <div className="flex items-center gap-2 px-2 border-r border-slate-700 mr-1 text-slate-500">
+              <Filter className="w-4 h-4" />
             </div>
 
             {activeReport.requiredFilters.includes('date-range') && (
