@@ -22,6 +22,11 @@ export class AuthController {
     return this.authService.login(dto.email, dto.password, dto.branchId);
   }
 
+  @Get('health')
+  health() {
+    return { status: 'OK', version: 'TRAP_V2_PROD', timestamp: new Date().toISOString() };
+  }
+
   // ✅ 1) ME enriquecido
   @UseGuards(JwtAuthGuard)
   @Get('me')

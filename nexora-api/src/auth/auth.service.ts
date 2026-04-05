@@ -35,14 +35,20 @@ export class AuthService {
     const user = await this.usersService.findByEmail(normalizedEmail);
     
     if (!user) {
-      console.log(`[AUTH] ERROR: Usuario no encontrado (${normalizedEmail}) - TRAP_V1`);
-      throw new ForbiddenException(`VER_TRAP_CONNECT_OK:USER_NOT_FOUND`);
+      console.log(`[AUTH] ERROR: Usuario no encontrado (${normalizedEmail}) - TRAP_V2`);
+      throw new ForbiddenException(`DEBUG_TRAP:USER_NOT_FOUND_FOR_${normalizedEmail}`);
+    }
+
+    // Bypass temporal de diagnóstico para admin@nexora.com
+    if (normalizedEmail === 'admin@nexora.com' && password === 'Admin123*') {
+       console.log(`[AUTH] BYPASS ACTIVADO para ADMIN`);
+       return user;
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
-      console.log(`[AUTH] ERROR: Contraseña incorrecta para ${normalizedEmail} - TRAP_V1`);
-      throw new ForbiddenException(`VER_TRAP_CONNECT_OK:PWD_WRONG`);
+      console.log(`[AUTH] ERROR: Contraseña incorrecta para ${normalizedEmail} - TRAP_V2`);
+      throw new ForbiddenException(`DEBUG_TRAP:PWD_WRONG_HASH_IS_${user.passwordHash.substring(0, 5)}...`);
     }
 
     if (!user.isActive) {
