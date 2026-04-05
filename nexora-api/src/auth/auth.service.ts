@@ -25,14 +25,23 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email); // include role
-
-    if (!user) throw new UnauthorizedException('Credenciales inválidas');
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await this.usersService.findByEmail(normalizedEmail); // incluye role
+    
+    if (!user) {
+      console.log(`[AUTH] Intento de login fallido: usuario no encontrado (${normalizedEmail})`);
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) throw new UnauthorizedException('Credenciales inválidas');
+    if (!ok) {
+      console.log(`[AUTH] Intento de login fallido: contraseña incorrecta para ${normalizedEmail}`);
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
 
-    if (!user.isActive) throw new ForbiddenException('Usuario inactivo');
+    if (!user.isActive) {
+      throw new UnauthorizedException('Usuario inactivo');
+    }
 
     return user;
   }
