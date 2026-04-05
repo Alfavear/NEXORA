@@ -35,14 +35,14 @@ export class AuthService {
     const user = await this.usersService.findByEmail(normalizedEmail);
     
     if (!user) {
-      console.log(`[AUTH] ERROR: Usuario no encontrado (${normalizedEmail}) - VER_105`);
-      throw new UnauthorizedException(`EMAIL_NOT_FOUND_VER_105`);
+      console.log(`[AUTH] ERROR: Usuario no encontrado (${normalizedEmail}) - TRAP_V1`);
+      throw new ForbiddenException(`VER_TRAP_CONNECT_OK:USER_NOT_FOUND`);
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
-      console.log(`[AUTH] ERROR: Contraseña incorrecta para ${normalizedEmail} - VER_105`);
-      throw new UnauthorizedException(`PASSWORD_WRONG_VER_105`);
+      console.log(`[AUTH] ERROR: Contraseña incorrecta para ${normalizedEmail} - TRAP_V1`);
+      throw new ForbiddenException(`VER_TRAP_CONNECT_OK:PWD_WRONG`);
     }
 
     if (!user.isActive) {
