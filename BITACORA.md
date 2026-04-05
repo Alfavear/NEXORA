@@ -107,3 +107,19 @@ Fecha: 30 marzo 2026
   3. Desplegar API en Render (`nexora-api`). [EN PROCESO]
   4. Desplegar Frontend en Vercel (`nexora-web`) apuntando a la API de Render.
   5. Validar flujo completo (Login -> Transacción -> Reporte).
+
+## Avance Detallado - 05 de abril 2026: Suite de Reportes "Nexora Elite"
+- **Impresión Profesional (80mm)**: 
+  - Rediseño total de la tirilla de venta con estética de terminal POS moderna. 
+  - Implementación de **Papel Dinámico**: El sistema inyecta estilos `@page` condicionales para alternar entre `80mm auto` (Tickets de Contado) y `A4` (Reportes de Crédito).
+  - Optimización de cabecera con logotipos escalables y tabla de ítems de alta legibilidad.
+- **Estabilización de Grillas de Reportes**:
+  - Se fijó el encabezado y los filtros en la parte superior para evitar el scroll infinito de la página completa, permitiendo que solo la grilla de datos se desplace.
+  - **Mapeo de Datos**: Se corrigió el enlace entre el API y el Frontend para los reportes de "Ventas Generales", asegurando la visualización de fechas y números de documento.
+  - **Clasificación de Ventas**: Se añadió la columna **"Tipo"** con badges de colores (Verde para Contado / Azul para Crédito) para una identificación inmediata en los listados.
+- **Flujos de Agilidad (Quick-Create)**:
+  - Implementación de modales "Pop-Out" para la creación inmediata de **Clientes** (desde el POS) y **Proveedores** (desde Compras), evitando el abandono del flujo de transacción principal.
+- **Hito de Producción**:
+  - Consolidación de todos los cambios en la rama `main`.
+  - **Git Push**: Sincronización exitosa con GitHub para activar los pipelines de despliegue en **Vercel** y **Render**.
+  - Limpieza de entorno local deteniendo servidores de desarrollo para transición total a nube.
