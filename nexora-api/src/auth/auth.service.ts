@@ -26,21 +26,27 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const normalizedEmail = email.trim().toLowerCase();
-    const user = await this.usersService.findByEmail(normalizedEmail); // incluye role
+    
+    // Log de diagnóstico para el comando DB (seguro)
+    const dbUrl = process.env.DATABASE_URL || '';
+    const dbHost = dbUrl.split('@')[1]?.split('/')[0] || 'unknown';
+    console.log(`[AUTH] Intento de login para: ${normalizedEmail} en DB: ${dbHost}`);
+
+    const user = await this.usersService.findByEmail(normalizedEmail);
     
     if (!user) {
-      console.log(`[AUTH] Intento de login fallido: usuario no encontrado (${normalizedEmail})`);
-      throw new UnauthorizedException('Credenciales inválidas');
+      console.log(`[AUTH] ERROR: Usuario no encontrado (${normalizedEmail})`);
+      throw new UnauthorizedException('EMAIL_NOT_FOUND');
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
-      console.log(`[AUTH] Intento de login fallido: contraseña incorrecta para ${normalizedEmail}`);
-      throw new UnauthorizedException('Credenciales inválidas');
+      console.log(`[AUTH] ERROR: Contraseña incorrecta para ${normalizedEmail}`);
+      throw new UnauthorizedException('PASSWORD_WRONG');
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('Usuario inactivo');
+      throw new UnauthorizedException('USER_INACTIVE');
     }
 
     return user;
