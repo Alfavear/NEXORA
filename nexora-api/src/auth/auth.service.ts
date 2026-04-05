@@ -7,7 +7,7 @@ import {
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 type JwtUser = {
   sub: number;
@@ -35,14 +35,14 @@ export class AuthService {
     const user = await this.usersService.findByEmail(normalizedEmail);
     
     if (!user) {
-      console.log(`[AUTH] ERROR: Usuario no encontrado (${normalizedEmail})`);
-      throw new UnauthorizedException('EMAIL_NOT_FOUND');
+      console.log(`[AUTH] ERROR: Usuario no encontrado (${normalizedEmail}) - VER_105`);
+      throw new UnauthorizedException(`EMAIL_NOT_FOUND_VER_105`);
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
-      console.log(`[AUTH] ERROR: Contraseña incorrecta para ${normalizedEmail}`);
-      throw new UnauthorizedException('PASSWORD_WRONG');
+      console.log(`[AUTH] ERROR: Contraseña incorrecta para ${normalizedEmail} - VER_105`);
+      throw new UnauthorizedException(`PASSWORD_WRONG_VER_105`);
     }
 
     if (!user.isActive) {
