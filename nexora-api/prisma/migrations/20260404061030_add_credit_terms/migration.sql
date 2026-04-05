@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Sale" ADD COLUMN     "installments" INTEGER NOT NULL DEFAULT 1,
+ADD COLUMN     "interestAmount" DECIMAL(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "interestRate" DECIMAL(5,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "lateInterestRate" DECIMAL(5,2) NOT NULL DEFAULT 0;

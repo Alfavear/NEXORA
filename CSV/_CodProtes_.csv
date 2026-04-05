@@ -1,0 +1,11 @@
+"codigo","descripcion"
+1.0,Insuficiencia de Fondos
+2.0,Mal Girado
+3.0,Fecha Inconforme
+4.0,Falta Firma
+5.0,Firma Inconforme
+6.0,Falta Sello
+7.0,Orden de no Pago
+8.0,Cuenta Cerrada
+9.0,Chequera Robada
+10.0,Otras Causas

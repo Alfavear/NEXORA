@@ -1,0 +1,7 @@
+"codigo","nombre","numero","descrip"
+1.0,Recibo de Caja,1110000.0,RC
+2.0,Cheques,2110448.0,CH
+3.0,Depositos,3110049.0,DP
+4.0,Otros Cobros,4110014.0,OC
+5.0,Nota de Cr�dito,5110072.0,NC
+6.0,Letra de Cambio,6110000.0,LC
