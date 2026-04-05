@@ -18,11 +18,23 @@ async function bootstrap() {
     }),
   );
 
-  const corsOrigin = process.env.FRONTEND_URL || '*';
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'https://nexora-web-git-main-alfavears-projects.vercel.app',
+    'https://nexora-lme1zkxmq-alfavears-projects.vercel.app'
+  ];
 
   app.enableCors({
-    origin: corsOrigin,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   await app.listen(process.env.PORT || 10000, '0.0.0.0');
