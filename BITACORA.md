@@ -62,13 +62,83 @@ Fecha: 30 marzo 2026
 ## Impuestos Dinámicos y Logos de Sede (SRI)
 - Se planificó la estructura para soportar impuestos dinámicos creando un modelo `Tax` y vinculándolo al maestro de artículos, garantizando adaptabilidad a futuros cambios tributarios.
 - Se planificó la inyección del campo `logoUrl` al modelo `Branch` para personalizar las impresiones térmicas (facturas/tickets).
+# Bitácora de trabajo - Nexora
+Fecha: 30 marzo 2026
+
+## Estado actual
+- Módulo Mantenimiento implementado en frontend (`Maintenance.tsx`) con formulario y tabla.
+- Items ahora con campos extendidos y maestros relacionados: `groupId`, `brandId`, `ownerId`, `providerId`.
+- Nuevos modelos Prisma:
+  - `ItemGroup`, `ItemBrand`, `ItemOwner`
+- Nuevos endpoints backend:
+  - `/item-groups`
+  - `/item-brands`
+  - `/item-owners`
+- `items` controller/service ajustado a validación en empresas para categorías/grupos/marcas/propietarios/proveedores.
+
+## Problemas abiertos
+- Prisma migration: hubo drift y carpetas de migración vacías. 
+- `npx prisma migrate reset` ejecutado, pero `npx prisma generate` falla con `EPERM` en Windows (`query_engine-windows.dll.node.tmp`).
+- Frontend `npm run build` OK; backend `nest build` OK.
+- Node warning: uso 20.17 (recomienda 20.19+).
+
+## Comandos para retomar
+1. Reabrir repo:
+   - `cd d:\Projects\Nexora\NEXORA`
+2. Backend:
+   - `cd nexora-api`
+   - `npx prisma generate`
+   - `npm run build`
+   - `npm run start:dev`
+3. Frontend:
+   - `cd ..\\nexora-web`
+   - `npm run dev`
+4. Si queda EPERM con prisma:
+   - cerrar dev server y VS Code
+   - reiniciar máquina
+   - repetir `npx prisma generate`
+
+## Siguiente paso sugerido
+1. Agregar CRUD UI de maestros (grupos/marcas/propietarios) desde la web.
+2. Probar creación de artículo con valores en selects (grupo/marca/propietario/proveedor/categoría).
+3. Asegurar stock / kardex refleja los cambios y traslados.
+4. Añadir gestión de deletions y estados activos/inactivos en maestros.
+
+## Referencias
+- `nexora-api/prisma/schema.prisma`
+- `nexora-api/src/items/items.service.ts`
+- `nexora-web/src/pages/Maintenance.tsx`
+
+## Avance del 31 marzo 2026
+- Se implementó `SalePayment` en prisma y enlace en `Sale`.
+- Se habilitaron endpoints nuevos en `SalesController`: `GET /sales/credits`, `POST /sales/:id/payments`, `GET /sales/:id/payments`.
+- Se agregaron validaciones y calc. de status en `SalesService` para crédito, parcial, pago y saldo.
+- UI de ventas (`Sales.tsx`) ahora soporta ventas crédito con `dueDate`, `initialPayment`, historial de cartera, abonos y `print invoice`.
+- Se agregó reporte de cartera avanzada (`GET /sales/credits/report`) con filtros `from`, `to`, `customerId`, `branchId`, `status`.
+- En `Reports.tsx`: se modularizó la sección de reportes en tipos (Ventas/Cartera), con filtros, grilla, procesar e imprimir visualizador.
+- En `Shell.tsx`: se añadió selector de sedes activo con cambio de sede en caliente (switchBranch) sin cerrar sesión.
+- En `Login.tsx`: ahora un vendedor debe escoger sede obligatoriamente antes de entrar al app.
+
+## Mantenimiento y Corrección de Conflictos
+- Se resolvieron los marcadores de conflictos de Git que se encontraban alojados erróneamente en el `README.md` y `BITACORA.md`.
+- Se refactorizó la comunicación entre `ReportsController` y `ReportsService` para pasar rigurosamente el parámetro de `companyId` aislando los datos por inquilino y aplicando el control preventivo `|| 0` a todas las propiedades numéricas, evitando quiebres del frontend (`NaN`) durante la invocación del método `.toFixed()`.
+
+## Impuestos Dinámicos y Logos de Sede (SRI)
+- Se planificó la estructura para soportar impuestos dinámicos creando un modelo `Tax` y vinculándolo al maestro de artículos, garantizando adaptabilidad a futuros cambios tributarios.
+- Se planificó la inyección del campo `logoUrl` al modelo `Branch` para personalizar las impresiones térmicas (facturas/tickets).
 - Se construyó e implementó el módulo backend `TaxesModule` (CRUD completo: Controller, Service, DTOs) para gestionar el catálogo de impuestos con aislamiento multi-tenant y borrado lógico.
 - Se refactorizó el motor de ventas (`sales.service.ts`) para calcular los impuestos de forma dinámica por cada línea de producto basándose en el catálogo `Tax`, blindando financieramente los montos desde el backend.
 - Se refactorizó el servicio de compras (`purchases.service.ts`) para integrar el cálculo dinámico de impuestos proveniente del catálogo maestro y se añadió la columna `tax` al modelo `Purchase`.
 - Se implementó la pantalla `Taxes.tsx` en el Frontend para el mantenimiento integral del catálogo de impuestos.
 - Se actualizó el maestro de Artículos (`Maintenance.tsx`) para exigir obligatoriamente la asignación de un impuesto al crear productos.
 - Se actualizó el maestro de Sucursales (`Branches.tsx`) para permitir la configuración de un `logoUrl` por cada sede.
-- **Pivote Arquitectónico:** Se refactorizó el modelo de datos para que los impuestos se apliquen a nivel de Venta (transacción global) en lugar de por Artículo individual, permitiendo la selección de múltiples impuestos dinámicos en el POS.
+- **Pivote Arquitectónico:** Se refactorizó el modelo de datos para que- [x] Conexión a API REST
+- [x] Diseño responsive (blanco + indigo pastel)
+- [x] Pantalla Completa en Móviles (Shell y Sidebar dinámicos)
+- [x] Estética Premium (Scrollbars y UI estilizada)
+- [x] Protección de rutas por autenticación
+- [x] Estado global con Context API
+lugar de por Artículo individual, permitiendo la selección de múltiples impuestos dinámicos en el POS.
 
 ## Estabilización de Reportes, Dashboard y Tipados
 - **Reportes Financieros:** Se aplicó un redondeo estricto a 2 decimales (`this.round2`) en todas las salidas numéricas del `ReportsService` para prevenir errores de coma flotante en JS.
@@ -123,3 +193,16 @@ Fecha: 30 marzo 2026
   - Consolidación de todos los cambios en la rama `main`.
   - **Git Push**: Sincronización exitosa con GitHub para activar los pipelines de despliegue en **Vercel** y **Render**.
   - Limpieza de entorno local deteniendo servidores de desarrollo para transición total a nube.
+
+## Optimización Mobile-First y Estética Premium (Actualización 05 de abril 2026 - Sesión 2)
+- **Shell & Navegación Dual**: 
+  - Rediseño del `Shell.tsx` con breakpoints inteligentes; el Sidebar ahora es un Drawer lateral en todas las resoluciones menores a 1024px, incluyendo el iPhone en modo horizontal (Landscape).
+  - Implementación de un Overlay táctil para cerrar menús con un solo toque.
+- **Suite de Reportes Responsiva**:
+  - Transformación del "Explorador de Reportes" en un **Drawer Dinámico**, liberando el 100% del ancho de pantalla para la visualización de datos.
+  - **Grillas Inteligentes**: Se implementó la ocultación selectiva de columnas (Subtotal/IVA) en celulares para priorizar el **Total** y el **Cliente**.
+  - **Scroll de Precisión**: Adición de contenedores con `min-width` para garantizar que los datos financieros nunca se encimen, habilitando un desplazamiento horizontal fluido.
+- **Punto de Venta (POS) Táctil**:
+  - **Sticky Action Bar**: Implementación de una barra inferior fija en móviles que contiene el Total y el botón de "Grabar Venta", optimizando la ergonomía para asesores en piso.
+- **Detalles Premium (UI/UX)**:
+  - **Custom Scrollbars**: Rediseño global de las barras de desplazamiento (Scrollbars) con estética minimalista, delgada (6px) y efectos de iluminación Índigo al pasar el mouse, eliminando la apariencia genérica del navegador.

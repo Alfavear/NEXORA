@@ -43,10 +43,10 @@ export default function Shell() {
       )}
 
       {/* SIDEBAR */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 border-r border-slate-800 p-5 shadow-2xl transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 border-r border-slate-800 p-5 shadow-2xl transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-extrabold tracking-wide text-white">Nexora</h1>
-          <button className="md:hidden text-slate-400 hover:text-white" onClick={closeMenu}><X className="w-6 h-6" /></button>
+          <button className="lg:hidden text-slate-400 hover:text-white" onClick={closeMenu}><X className="w-6 h-6" /></button>
         </div>
         <p className="text-xs uppercase text-indigo-200 tracking-wider mb-6 -mt-4">Sistema comercial</p>
 
@@ -91,21 +91,21 @@ export default function Shell() {
       </aside>
 
       {/* MAIN */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
 
         {/* HEADER */}
-        <header className="sticky top-0 z-30 backdrop-blur-md bg-slate-950/80 border-b border-slate-800 px-4 md:px-6 py-3 md:py-4 flex justify-between items-center shadow-md">
-          <div className="flex items-center gap-3">
-            <button className="md:hidden p-2 -ml-2 text-slate-300 hover:text-white bg-slate-800/50 rounded-lg" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu className="w-5 h-5" />
+        <header className="sticky top-0 z-30 backdrop-blur-md bg-slate-950/80 border-b border-slate-800 px-3 sm:px-6 py-2 sm:py-4 flex justify-between items-center shadow-lg">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button className="lg:hidden p-2 -ml-2 text-slate-300 hover:text-white bg-slate-800/50 rounded-xl transition-all active:scale-90" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu className="w-6 h-6" />
             </button>
-            <div className="text-sm text-slate-200 hidden sm:block truncate">
-              Hola, <span className="font-semibold text-white">{me?.name}</span>
+            <div className="text-sm text-slate-200 hidden xs:block truncate">
+              Hola, <span className="font-semibold text-white">{me?.name?.split(' ')[0]}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <select
-              className="input py-1.5 md:input-sm bg-slate-900 text-white border-slate-700 text-xs md:text-sm max-w-[120px] md:max-w-none truncate"
+              className="input py-1.5 px-2 bg-slate-900 text-white border-slate-700 text-[11px] sm:text-sm max-w-[100px] sm:max-w-none rounded-lg"
               value={me?.branchId ?? ''}
               onChange={async (e) => {
                 const bid = Number(e.target.value);
@@ -120,7 +120,7 @@ export default function Shell() {
             </select>
             <button
               onClick={logout}
-              className="btn-danger py-1.5 md:py-2 px-3 md:px-4 text-xs md:text-sm whitespace-nowrap"
+              className="btn-danger py-1.5 sm:py-2 px-3 sm:px-4 text-[11px] sm:text-sm font-bold active:scale-95 transition-all"
             >
               Salir
             </button>

@@ -399,332 +399,358 @@ export default function Sales() {
 
       {/* TAB: PUNTO DE VENTA */}
       {activeTab === 'POS' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+        <>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in relative pb-20">
         
-        {/* LEFT COLUMN: PARAMS (MOVED TO BOTTOM ON MOBILE VIA ORDER) */}
-        <div className="card p-4 md:p-5 order-2 lg:order-1 flex flex-col gap-1">
-          <h2 className="text-xl font-semibold mb-3">Cliente y parámetros</h2>
-          <div className="flex justify-between items-end mb-2">
-            <label className="text-sm text-slate-300">Cliente</label>
-            <button 
-              onClick={() => setShowCustomerModal(true)} 
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
-            >
-              + Nuevo Cliente
-            </button>
-          </div>
-          <select
-            className="input bg-white text-black w-full"
-            value={selectedCustomer ?? ''}
-            onChange={(e) => setSelectedCustomer(Number(e.target.value) || null)}
-          >
-            <option value="">Cliente genérico</option>
-            {customers.map((customer) => (
-              <option key={customer.id} value={customer.id}>
-                {customer.name}
-              </option>
-            ))}
-          </select>
-          <label className="block mb-2">
-            Recibo / factura (opcional)
-            <input
-              className="input mt-1"
-              value={externalReceipt}
-              onChange={(e) => setExternalReceipt(e.target.value)}
-            />
-          </label>
-          <label className="block mb-2">
-            Tipo de venta
+          {/* LEFT COLUMN: PARAMS (MOVED TO BOTTOM ON MOBILE VIA ORDER) */}
+          <div className="card p-4 md:p-5 order-2 lg:order-1 flex flex-col gap-1">
+            <h2 className="text-xl font-semibold mb-3">Cliente y parámetros</h2>
+            <div className="flex justify-between items-end mb-2">
+              <label className="text-sm text-slate-300">Cliente</label>
+              <button 
+                onClick={() => setShowCustomerModal(true)} 
+                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+              >
+                + Nuevo Cliente
+              </button>
+            </div>
             <select
-              className="input mt-1"
-              value={saleType}
-              onChange={(e) => setSaleType(e.target.value as 'CONTADO' | 'CRÉDITO')}
+              className="input bg-white text-black w-full"
+              value={selectedCustomer ?? ''}
+              onChange={(e) => setSelectedCustomer(Number(e.target.value) || null)}
             >
-              <option value="CONTADO">Contado</option>
-              <option value="CRÉDITO">Crédito</option>
+              <option value="">Cliente genérico</option>
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.name}
+                </option>
+              ))}
             </select>
-          </label>
+            <label className="block mb-2">
+              Recibo / factura (opcional)
+              <input
+                className="input mt-1"
+                value={externalReceipt}
+                onChange={(e) => setExternalReceipt(e.target.value)}
+              />
+            </label>
+            <label className="block mb-2">
+              Tipo de venta
+              <select
+                className="input mt-1"
+                value={saleType}
+                onChange={(e) => setSaleType(e.target.value as 'CONTADO' | 'CRÉDITO')}
+              >
+                <option value="CONTADO">Contado</option>
+                <option value="CRÉDITO">Crédito</option>
+              </select>
+            </label>
 
-          {saleType === 'CRÉDITO' && (
-            <div className="grid grid-cols-2 gap-3 mb-2 p-3 bg-indigo-900/10 border border-indigo-500/30 rounded-xl">
-              <label className="block">
-                Vencimiento Final
-                <input
-                  type="date"
-                  className="input w-full mt-1 bg-slate-900/50"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                />
-              </label>
-              <label className="block">
-                Plazos (Cuotas)
-                <input
-                  type="number"
-                  min={1}
-                  className="input w-full mt-1 bg-slate-900/50"
-                  value={installments}
-                  onChange={(e) => setInstallments(Number(e.target.value))}
-                />
-              </label>
-              <label className="block">
-                % Int. Corriente
-                <input
-                  type="number" min={0} step="0.01"
-                  className="input w-full mt-1 bg-slate-900/50"
-                  value={interestRate}
-                  onChange={(e) => setInterestRate(Number(e.target.value))}
-                />
-              </label>
-              <label className="block">
-                % Int. por Mora
-                <input
-                  type="number" min={0} step="0.01"
-                  className="input w-full mt-1 bg-slate-900/50"
-                  value={lateInterestRate}
-                  onChange={(e) => setLateInterestRate(Number(e.target.value))}
-                />
-              </label>
-            </div>
-          )}
-
-          <div className="mt-4 p-3 rounded-xl border border-indigo-500/30 bg-indigo-900/10 space-y-3">
-            <h3 className="font-semibold text-indigo-200">Pagos</h3>
-            {payments.map((p, idx) => (
-              <div key={idx} className="flex gap-2">
-                <select
-                  className="input flex-1 bg-white text-black"
-                  value={p.paymentMethodId}
-                  onChange={(e) => {
-                    const newId = Number(e.target.value);
-                    setPayments((prev) => prev.map((item, i) => (i === idx ? { ...item, paymentMethodId: newId } : item)));
-                  }}
-                >
-                  <option value={0}>Selecciona método</option>
-                  {paymentMethods.map((pm) => (
-                    <option key={pm.id} value={pm.id}>
-                      {pm.name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  min={0.01}
-                  step="0.01"
-                  className="input w-32"
-                  value={p.amount}
-                  onChange={(e) => {
-                    const newAmount = Number(e.target.value);
-                    setPayments((prev) => prev.map((item, i) => (i === idx ? { ...item, amount: newAmount } : item)));
-                  }}
-                />
-                <button
-                  className="btn-danger p-2"
-                  onClick={() => setPayments((prev) => prev.filter((_, i) => i !== idx))}
-                >
-                  X
-                </button>
-              </div>
-            ))}
-            <div className="flex gap-2 text-sm text-slate-300">
-              Pagado acumulado: ${payments.reduce((acc, p) => acc + p.amount, 0).toFixed(2)}
-            </div>
-            <button
-              className="btn-soft w-full text-sm"
-              onClick={() => {
-                const alreadyAdded = payments.reduce((acc, p) => acc + p.amount, 0);
-                const remaining = total - alreadyAdded;
-                setPayments([...payments, { paymentMethodId: 0, amount: remaining > 0 ? remaining : 0 }]);
-              }}
-            >
-              + Añadir pago
-            </button>
-          </div>
-
-          <div className="mt-4 p-3 rounded-xl border border-cyan-500/30 bg-cyan-900/10 space-y-2">
-            <h3 className="font-semibold text-cyan-200">Impuestos Aplicables</h3>
-            {taxes.map(tax => (
-              <div key={tax.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id={`tax-chk-${tax.id}`}
-                  className="h-4 w-4 rounded"
-                  checked={selectedTaxIds.includes(tax.id)}
-                  onChange={(e) => {
-                    if (e.target.checked) setSelectedTaxIds(prev => [...prev, tax.id]);
-                    else setSelectedTaxIds(prev => prev.filter(id => id !== tax.id));
-                  }}
-                />
-                <label htmlFor={`tax-chk-${tax.id}`} className="text-sm">{tax.name} ({Number(tax.rate).toFixed(2)}%)</label>
-              </div>
-            ))}
-          </div>
-
-          <label className="block mb-2">
-            Descuento
-            <input
-              type="number"
-              min={0}
-              className="input mt-1"
-              value={discount}
-              onChange={(e) => setDiscount(Number(e.target.value) || 0)}
-            />
-          </label>
-
-          <label className="block mb-2">
-            Transporte
-            <input
-              type="number"
-              min={0}
-              className="input mt-1"
-              value={transport}
-              onChange={(e) => setTransport(Number(e.target.value) || 0)}
-            />
-          </label>
-
-          <div className="rounded-xl bg-slate-900/50 border border-slate-700 p-3 mt-2">
-            <div className="flex justify-between text-sm text-slate-300">
-              <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm text-slate-300">
-              <span>Descuento</span>
-              <span>-${discount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm text-slate-300">
-              <span>Transporte</span>
-              <span>${transport.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm text-slate-300">
-              <span>Impuestos</span>
-              <span>${tax.toFixed(2)}</span>
-            </div>
-            {interest > 0 && (
-              <div className="flex justify-between text-sm text-indigo-300 font-semibold">
-                <span>Interés por Crédito</span>
-                <span>${interest.toFixed(2)}</span>
+            {saleType === 'CRÉDITO' && (
+              <div className="grid grid-cols-2 gap-3 mb-2 p-3 bg-indigo-900/10 border border-indigo-500/30 rounded-xl">
+                <label className="block">
+                  Vencimiento Final
+                  <input
+                    type="date"
+                    className="input w-full mt-1 bg-slate-900/50"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                  />
+                </label>
+                <label className="block">
+                  Plazos (Cuotas)
+                  <input
+                    type="number"
+                    min={1}
+                    className="input w-full mt-1 bg-slate-900/50"
+                    value={installments}
+                    onChange={(e) => setInstallments(Number(e.target.value))}
+                  />
+                </label>
+                <label className="block">
+                  % Int. Corriente
+                  <input
+                    type="number" min={0} step="0.01"
+                    className="input w-full mt-1 bg-slate-900/50"
+                    value={interestRate}
+                    onChange={(e) => setInterestRate(Number(e.target.value))}
+                  />
+                </label>
+                <label className="block">
+                  % Int. por Mora
+                  <input
+                    type="number" min={0} step="0.01"
+                    className="input w-full mt-1 bg-slate-900/50"
+                    value={lateInterestRate}
+                    onChange={(e) => setLateInterestRate(Number(e.target.value))}
+                  />
+                </label>
               </div>
             )}
-            <div className="mt-2 flex justify-between text-base font-bold text-white">
-              <span>Total neto</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-          </div>
 
-          <label className="block mb-2 mt-4">
-            Notas (opcional)
-            <textarea
-              className="input mt-1 h-24 resize-none"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-          </label>
-          <button
-            className="btn-primary w-full mt-4 py-4 text-lg font-bold shadow-lg shadow-indigo-500/20 md:hidden"
-            onClick={submitSale}
-            disabled={loading}
-          >
-            {loading ? 'Procesando...' : 'GRABAR VENTA'}
-          </button>
-        </div>
-
-        {/* RIGHT COLUMN: PRODUCTS & CART (MOVED TO TOP ON MOBILE VIA ORDER) */}
-        <div className="card p-4 md:p-5 lg:col-span-2 order-1 lg:order-2 flex flex-col">
-          <h2 className="text-xl font-semibold mb-3">Agregar productos</h2>
-          <div className="grid grid-cols-1 gap-2 mb-3">
-            <div className="flex gap-2">
-              <input
-                className="input flex-1"
-                placeholder="Buscar producto..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <button className="btn-soft px-3" onClick={() => setSearch('')}>
-                Limpiar
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <input
-                className="input flex-1"
-                placeholder="Cód / Nombre"
-                value={itemCode}
-                onChange={(e) => setItemCode(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addByCode()}
-              />
-              <button className="btn-primary px-3" type="button" onClick={addByCode}>
-                Agregar
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[40vh] md:max-h-[50vh] overflow-y-auto pr-2 pb-2 custom-scrollbar">
-            {filteredItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => addToCart(item)}
-                className="rounded-xl border border-slate-700/50 p-3 text-left bg-slate-800/40 hover:bg-indigo-900/40 hover:border-indigo-500/50 transition-colors active:scale-95 shadow-md flex flex-col justify-between h-full"
-              >
-                <div className="font-bold text-white text-sm md:text-base leading-tight mb-2">{item.name}</div>
-                <div className="text-xs md:text-sm text-emerald-400 font-mono bg-emerald-500/10 px-2 py-1 rounded inline-block mt-auto">
-                  ${Number(item.salePrice ?? item.basePrice ?? 0).toFixed(2)}
+            <div className="mt-4 p-3 rounded-xl border border-indigo-500/30 bg-indigo-900/10 space-y-3">
+              <h3 className="font-semibold text-indigo-200">Pagos</h3>
+              {payments.map((p, idx) => (
+                <div key={idx} className="flex gap-2">
+                  <select
+                    className="input flex-1 bg-white text-black"
+                    value={p.paymentMethodId}
+                    onChange={(e) => {
+                      const newId = Number(e.target.value);
+                      setPayments((prev) => prev.map((item, i) => (i === idx ? { ...item, paymentMethodId: newId } : item)));
+                    }}
+                  >
+                    <option value={0}>Selecciona método</option>
+                    {paymentMethods.map((pm) => (
+                      <option key={pm.id} value={pm.id}>
+                        {pm.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={0.01}
+                    step="0.01"
+                    className="input w-32"
+                    value={p.amount}
+                    onChange={(e) => {
+                      const newAmount = Number(e.target.value);
+                      setPayments((prev) => prev.map((item, i) => (i === idx ? { ...item, amount: newAmount } : item)));
+                    }}
+                  />
+                  <button
+                    className="btn-danger p-2"
+                    onClick={() => setPayments((prev) => prev.filter((_, i) => i !== idx))}
+                  >
+                    X
+                  </button>
                 </div>
+              ))}
+              <div className="flex gap-2 text-sm text-slate-300">
+                Pagado acumulado: ${payments.reduce((acc, p) => acc + p.amount, 0).toFixed(2)}
+              </div>
+              <button
+                className="btn-soft w-full text-sm"
+                onClick={() => {
+                  const alreadyAdded = payments.reduce((acc, p) => acc + p.amount, 0);
+                  const remaining = total - alreadyAdded;
+                  setPayments([...payments, { paymentMethodId: 0, amount: remaining > 0 ? remaining : 0 }]);
+                }}
+              >
+                + Añadir pago
               </button>
-            ))}
+            </div>
+
+            <div className="mt-4 p-3 rounded-xl border border-cyan-500/30 bg-cyan-900/10 space-y-2">
+              <h3 className="font-semibold text-cyan-200">Impuestos Aplicables</h3>
+              {taxes.map(tax => (
+                <div key={tax.id} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`tax-chk-${tax.id}`}
+                    className="h-4 w-4 rounded"
+                    checked={selectedTaxIds.includes(tax.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedTaxIds(prev => [...prev, tax.id]);
+                      else setSelectedTaxIds(prev => prev.filter(id => id !== tax.id));
+                    }}
+                  />
+                  <label htmlFor={`tax-chk-${tax.id}`} className="text-sm">{tax.name} ({Number(tax.rate).toFixed(2)}%)</label>
+                </div>
+              ))}
+            </div>
+
+            <label className="block mb-2">
+              Descuento
+              <input
+                type="number"
+                min={0}
+                className="input mt-1"
+                value={discount}
+                onChange={(e) => setDiscount(Number(e.target.value) || 0)}
+              />
+            </label>
+
+            <label className="block mb-2">
+              Transporte
+              <input
+                type="number"
+                min={0}
+                className="input mt-1"
+                value={transport}
+                onChange={(e) => setTransport(Number(e.target.value) || 0)}
+              />
+            </label>
+
+            <div className="rounded-xl bg-slate-900/50 border border-slate-700 p-3 mt-2">
+              <div className="flex justify-between text-sm text-slate-300">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-slate-300">
+                <span>Descuento</span>
+                <span>-${discount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-slate-300">
+                <span>Transporte</span>
+                <span>${transport.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-slate-300">
+                <span>Impuestos</span>
+                <span>${tax.toFixed(2)}</span>
+              </div>
+              {interest > 0 && (
+                <div className="flex justify-between text-sm text-indigo-300 font-semibold">
+                  <span>Interés por Crédito</span>
+                  <span>${interest.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="mt-2 flex justify-between text-base font-bold text-white">
+                <span>Total neto</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <label className="block mb-2 mt-4">
+              Notas (opcional)
+              <textarea
+                className="input mt-1 h-24 resize-none"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </label>
+            <button
+              className="btn-primary w-full mt-4 py-4 text-lg font-bold shadow-lg shadow-indigo-500/20 md:hidden"
+              onClick={submitSale}
+              disabled={loading}
+            >
+              {loading ? 'Procesando...' : 'GRABAR VENTA'}
+            </button>
           </div>
 
-          <div className="mt-6 border-t border-slate-700 pt-4">
-            <h3 className="text-lg md:text-xl font-bold mb-3 flex justify-between items-center">
-              <span>Carrito de Compras</span>
-              <span className="bg-indigo-500 text-white text-xs px-2 py-1 rounded-full">{cart.length} ítem(s)</span>
-            </h3>
-            <div className="space-y-3 mt-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-              {cart.length === 0 ? (
-                <div className="p-8 rounded-xl bg-slate-800/20 border border-slate-700/50 border-dashed text-center text-slate-400">El carrito está vacío. Agrega productos de la lista superior.</div>
-              ) : (
-                cart.map((item) => (
-                  <div key={item.itemId} className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center rounded-xl bg-slate-800/40 p-4 border border-slate-700/50 shadow-sm relative">
-                    <div className="flex-1">
-                      <div className="font-bold text-white pr-6 text-sm md:text-base leading-tight">{item.name}</div>
-                      <div className="text-xs md:text-sm text-indigo-300 mt-1 font-mono">${Number(item.unitPrice).toFixed(2)} c/u</div>
-                      <label className="text-xs text-slate-400 inline-flex items-center gap-2 mt-3 cursor-pointer p-1 -ml-1 rounded hover:bg-slate-800 transition-colors w-max">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded bg-slate-950 border-slate-600 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900"
-                          checked={item.isGift ?? false}
-                          onChange={(e) => {
-                            const gift = e.target.checked;
-                            setCart((prev) =>
-                              prev.map((c) =>
-                                c.itemId === item.itemId ? { ...c, isGift: gift, unitPrice: gift ? 0 : c.unitPrice } : c,
-                              ),
-                            );
-                          }}
-                        />
-                        Marcar como Regalo (Gratis)
-                      </label>
-                    </div>
-                    
-                    <div className="flex items-center justify-between w-full sm:w-auto gap-4 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-700/50 sm:border-0">
-                      <div className="flex items-center bg-slate-950 rounded-lg border border-slate-700 overflow-hidden shadow-inner">
-                        <button className="px-4 py-2 md:py-1.5 text-xl font-bold text-indigo-400 hover:bg-slate-800 hover:text-indigo-300 transition-colors active:bg-slate-700" onClick={() => updateQuantity(item.itemId, item.quantity - 1)} disabled={item.quantity <= 1}>-</button>
-                        <input type="number" inputMode="decimal" className="w-12 text-center bg-transparent text-white font-bold border-none focus:ring-0 p-0 text-sm md:text-base appearance-none m-0" value={item.quantity} min={1} onChange={(e) => updateQuantity(item.itemId, Number(e.target.value))} />
-                        <button className="px-4 py-2 md:py-1.5 text-xl font-bold text-indigo-400 hover:bg-slate-800 hover:text-indigo-300 transition-colors active:bg-slate-700" onClick={() => updateQuantity(item.itemId, item.quantity + 1)}>+</button>
-                      </div>
-                      <button className="bg-rose-500/10 text-rose-400 p-2.5 rounded-lg hover:bg-rose-500/20 transition-colors active:bg-rose-500/30 border border-rose-500/20 absolute top-2 right-2 sm:relative sm:top-auto sm:right-auto" onClick={() => removeFromCart(item.itemId)}>
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
+          {/* RIGHT COLUMN: PRODUCTS & CART (MOVED TO TOP ON MOBILE VIA ORDER) */}
+          <div className="card p-4 md:p-5 lg:col-span-2 order-1 lg:order-2 flex flex-col">
+            <h2 className="text-xl font-semibold mb-3">Agregar productos</h2>
+            <div className="grid grid-cols-1 gap-2 mb-3">
+              <div className="flex gap-2">
+                <input
+                  className="input flex-1"
+                  placeholder="Buscar producto..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <button className="btn-soft px-3" onClick={() => setSearch('')}>
+                  Limpiar
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  className="input flex-1"
+                  placeholder="Cód / Nombre"
+                  value={itemCode}
+                  onChange={(e) => setItemCode(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addByCode()}
+                />
+                <button className="btn-primary px-3" type="button" onClick={addByCode}>
+                  Agregar
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[40vh] md:max-h-[50vh] overflow-y-auto pr-2 pb-2 custom-scrollbar">
+              {filteredItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => addToCart(item)}
+                  className="rounded-xl border border-slate-700/50 p-3 text-left bg-slate-800/40 hover:bg-indigo-900/40 hover:border-indigo-500/50 transition-colors active:scale-95 shadow-md flex flex-col justify-between h-full"
+                >
+                  <div className="font-bold text-white text-sm md:text-base leading-tight mb-2">{item.name}</div>
+                  <div className="text-xs md:text-sm text-emerald-400 font-mono bg-emerald-500/10 px-2 py-1 rounded inline-block mt-auto">
+                    ${Number(item.salePrice ?? item.basePrice ?? 0).toFixed(2)}
                   </div>
-                ))
-              )}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-6 border-t border-slate-700 pt-4">
+              <h3 className="text-lg md:text-xl font-bold mb-3 flex justify-between items-center">
+                <span>Carrito de Compras</span>
+                <span className="bg-indigo-500 text-white text-xs px-2 py-1 rounded-full">{cart.length} ítem(s)</span>
+              </h3>
+              <div className="space-y-3 mt-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                {cart.length === 0 ? (
+                  <div className="p-8 rounded-xl bg-slate-800/20 border border-slate-700/50 border-dashed text-center text-slate-400">El carrito está vacío. Agrega productos de la lista superior.</div>
+                ) : (
+                  cart.map((item) => (
+                    <div key={item.itemId} className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center rounded-xl bg-slate-800/40 p-4 border border-slate-700/50 shadow-sm relative">
+                      <div className="flex-1">
+                        <div className="font-bold text-white pr-6 text-sm md:text-base leading-tight">{item.name}</div>
+                        <div className="text-xs md:text-sm text-indigo-300 mt-1 font-mono">${Number(item.unitPrice).toFixed(2)} c/u</div>
+                        <label className="text-xs text-slate-400 inline-flex items-center gap-2 mt-3 cursor-pointer p-1 -ml-1 rounded hover:bg-slate-800 transition-colors w-max">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 rounded bg-slate-950 border-slate-600 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900"
+                            checked={item.isGift ?? false}
+                            onChange={(e) => {
+                              const gift = e.target.checked;
+                              setCart((prev) =>
+                                prev.map((c) =>
+                                  c.itemId === item.itemId ? { ...c, isGift: gift, unitPrice: gift ? 0 : c.unitPrice } : c,
+                                ),
+                              );
+                            }}
+                          />
+                          Marcar como Regalo (Gratis)
+                        </label>
+                      </div>
+                      
+                      <div className="flex items-center justify-between w-full sm:w-auto gap-4 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-700/50 sm:border-0">
+                        <div className="flex items-center bg-slate-950 rounded-lg border border-slate-700 overflow-hidden shadow-inner">
+                          <button className="px-4 py-2 md:py-1.5 text-xl font-bold text-indigo-400 hover:bg-slate-800 hover:text-indigo-300 transition-colors active:bg-slate-700" onClick={() => updateQuantity(item.itemId, item.quantity - 1)} disabled={item.quantity <= 1}>-</button>
+                          <input type="number" inputMode="decimal" className="w-12 text-center bg-transparent text-white font-bold border-none focus:ring-0 p-0 text-sm md:text-base appearance-none m-0" value={item.quantity} min={1} onChange={(e) => updateQuantity(item.itemId, Number(e.target.value))} />
+                          <button className="px-4 py-2 md:py-1.5 text-xl font-bold text-indigo-400 hover:bg-slate-800 hover:text-indigo-300 transition-colors active:bg-slate-700" onClick={() => updateQuantity(item.itemId, item.quantity + 1)}>+</button>
+                        </div>
+                        <button className="bg-rose-500/10 text-rose-400 p-2.5 rounded-lg hover:bg-rose-500/20 transition-colors active:bg-rose-500/30 border border-rose-500/20 absolute top-2 right-2 sm:relative sm:top-auto sm:right-auto" onClick={() => removeFromCart(item.itemId)}>
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="mt-auto pt-6 flex justify-between items-end border-t border-slate-700 md:mb-0 mb-20">
+              <div className="text-lg">Total:</div>
+              <div className="text-3xl md:text-4xl font-black text-emerald-400 drop-shadow-md">${total.toFixed(2)}</div>
             </div>
           </div>
+        </div>
 
-          <div className="mt-auto pt-6 flex justify-between items-end border-t border-slate-700">
-            <div className="text-lg">Total:</div>
-            <div className="text-3xl md:text-4xl font-black text-emerald-400 drop-shadow-md">${total.toFixed(2)}</div>
+        {/* STICKY BOTTOM BAR FOR MOBILE/TABLET */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-700 p-3 z-40 flex justify-between items-center shadow-[0_-4px_15px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-300">
+          <div className="flex flex-col">
+            <span className="text-[9px] text-slate-400 uppercase font-black tracking-tight">Total a Cobrar</span>
+            <span className="text-xl font-black text-emerald-400 leading-none">${total.toFixed(2)}</span>
+          </div>
+          <div className="flex gap-2">
+             <button 
+              className="btn-soft px-4 py-3 font-bold text-xs active:scale-95 transition-all"
+              onClick={resetForm}
+              disabled={loading}
+            >
+              LIMPIAR
+            </button>
+            <button 
+              className="btn-primary px-6 py-3 font-black text-sm active:scale-95 transition-all shadow-lg shadow-indigo-500/30"
+              onClick={submitSale}
+              disabled={loading || cart.length === 0}
+            >
+              {loading ? '...' : 'GRABAR VENTA'}
+            </button>
           </div>
         </div>
-        </div>
+        </>
       )}
 
       {/* TAB: HISTORIAL DE VENTAS */}
@@ -957,7 +983,7 @@ export default function Sales() {
                 onClick={handlePrint} 
                 className="btn-primary w-full py-3 flex items-center justify-center gap-2"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                 Imprimir Tirilla (Ticket)
               </button>
               <button 

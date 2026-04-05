@@ -16,6 +16,31 @@
   * {
     box-sizing: border-box;
   }
+
+  /* CUSTOM SCROLLBAR GLOBAL */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-800 rounded-full transition-colors duration-300;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-indigo-500/80;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1e293b transparent;
+  }
 }
 
 @layer components {
@@ -43,5 +68,14 @@
   .pill { @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium; }
   .pill-indigo { @apply pill bg-indigo-500/20 text-indigo-100; }
   .pill-emerald { @apply pill bg-emerald-500/20 text-emerald-100; }
+
+  /* Utility for no scrollbars but active scrolling */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 

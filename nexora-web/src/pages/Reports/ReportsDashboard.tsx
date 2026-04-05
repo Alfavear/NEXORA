@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { FileText, Printer, Search, RefreshCw, Filter, ChevronRight, ChevronDown } from 'lucide-react';
+import { FileText, Printer, Search, RefreshCw, Filter, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { reportsApi } from '../../api/reports';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 
@@ -52,6 +52,8 @@ export default function ReportsDashboard() {
   // Expanded Categories logic
   const [expandedCategories, setExpandedCategories] = useState<string[]>(REPORT_CATEGORIES.map(c => c.id));
 
+  const [showExplorer, setShowExplorer] = useState(false);
+
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -69,6 +71,7 @@ export default function ReportsDashboard() {
     setActiveReportId(reportId);
     setData(null);
     setSelectedRecord(null);
+    setShowExplorer(false); // Close on selection
   };
 
   const toggleCategory = (categoryId: string) => {
@@ -142,8 +145,8 @@ export default function ReportsDashboard() {
     if (activeReportId === 'SALES_VOLUME') {
       if (!data.summary || data.breakdown.length === 0) return <p className="text-gray-400 p-4">No hay datos en grilla para este filtro.</p>;
       return (
-        <div className="flex flex-col gap-6 bg-slate-900/50 p-6">
-          <div>
+        <div className="flex flex-col gap-6 bg-slate-900/50 p-6 overflow-x-auto">
+          <div className="min-w-[800px]">
             <h3 className="px-4 py-2 text-lg font-bold text-white border-b border-slate-700">Top 10 Productos Vendidos</h3>
             <table className="w-full text-sm text-left font-mono mt-2">
               <thead className="text-xs uppercase text-slate-400 border-b border-slate-700">
@@ -166,7 +169,7 @@ export default function ReportsDashboard() {
               </tbody>
             </table>
           </div>
-          <div>
+          <div className="min-w-[800px]">
             <h3 className="px-4 py-2 text-lg font-bold text-white border-b border-slate-700">Desglose de Ingresos ({data.summary.periodLabel})</h3>
             <table className="w-full text-sm text-left font-mono mt-2">
               <thead className="text-xs uppercase text-slate-400 border-b border-slate-700">
@@ -196,15 +199,15 @@ export default function ReportsDashboard() {
       if (records.length === 0) return <p className="text-gray-400 p-4">No hay ventas registradas en este periodo.</p>;
 
       return (
-        <table className="w-full text-sm text-left font-mono">
+        <table className="w-full text-sm text-left font-mono min-w-[900px]">
           <thead className="text-xs uppercase bg-slate-900 text-slate-400 border-b border-slate-700">
             <tr>
               <th className="px-6 py-4">Fecha</th>
               <th className="px-6 py-4">Documento</th>
               <th className="px-6 py-4">Tipo</th>
               <th className="px-6 py-4">Cliente</th>
-              <th className="px-6 py-4 text-right">Subtotal</th>
-              <th className="px-6 py-4 text-right">Impuestos</th>
+              <th className="px-6 py-4 text-right hidden md:table-cell">Subtotal</th>
+              <th className="px-6 py-4 text-right hidden md:table-cell">Impuestos</th>
               <th className="px-6 py-4 text-right font-bold">Total</th>
             </tr>
           </thead>
@@ -230,8 +233,8 @@ export default function ReportsDashboard() {
                    <div className="font-semibold text-slate-100 uppercase">{row.customerName || row.customer?.name || 'CONSUMIDOR FINAL'}</div>
                    <div className="text-[10px] text-slate-500">{row.branchName || row.branch?.name || 'SUCURSAL'}</div>
                 </td>
-                <td className="px-6 py-3 text-right text-slate-400">${Number(row.subtotal || 0).toFixed(2)}</td>
-                <td className="px-6 py-3 text-right text-amber-500/80">${Number(row.tax || 0).toFixed(2)}</td>
+                <td className="px-6 py-3 text-right text-slate-400 hidden md:table-cell">${Number(row.subtotal || 0).toFixed(2)}</td>
+                <td className="px-6 py-3 text-right text-amber-500/80 hidden md:table-cell">${Number(row.tax || 0).toFixed(2)}</td>
                 <td className="px-6 py-3 text-right text-emerald-400 font-black">${Number(row.total || 0).toFixed(2)}</td>
               </tr>
             ))}
@@ -245,15 +248,15 @@ export default function ReportsDashboard() {
       if (records.length === 0) return <p className="text-gray-400 p-4">No hay documentos para este filtro.</p>;
 
       return (
-        <table className="w-full text-sm text-left font-mono">
+        <table className="w-full text-sm text-left font-mono min-w-[1000px]">
           <thead className="text-xs uppercase bg-slate-900 text-slate-400 border-b border-slate-700">
             <tr>
               <th className="px-6 py-4">Fecha</th>
               <th className="px-6 py-4">N° Documento</th>
               <th className="px-6 py-4">Tipo</th>
               <th className="px-6 py-4">Cliente</th>
-              <th className="px-6 py-4 text-right">Subtotal</th>
-              <th className="px-6 py-4 text-right">Impuestos</th>
+              <th className="px-6 py-4 text-right hidden md:table-cell">Subtotal</th>
+              <th className="px-6 py-4 text-right hidden md:table-cell">Impuestos</th>
               <th className="px-6 py-4 text-right">Total</th>
               <th className="px-6 py-4 text-center">Acciones</th>
             </tr>
@@ -278,8 +281,8 @@ export default function ReportsDashboard() {
                    <div className="font-semibold text-slate-100">{row.customer?.name || 'Consumidor Final'}</div>
                    <div className="text-[10px] text-slate-500 uppercase">{row.customer?.document || '---'}</div>
                 </td>
-                <td className="px-6 py-3 text-right text-slate-400">${Number(row.subtotal).toFixed(2)}</td>
-                <td className="px-6 py-3 text-right text-amber-500/80">${Number(row.tax || 0).toFixed(2)}</td>
+                <td className="px-6 py-3 text-right text-slate-400 hidden md:table-cell">${Number(row.subtotal).toFixed(2)}</td>
+                <td className="px-6 py-3 text-right text-amber-500/80 hidden md:table-cell">${Number(row.tax || 0).toFixed(2)}</td>
                 <td className="px-6 py-3 text-right text-emerald-400 font-bold">${Number(row.total).toFixed(2)}</td>
                 <td className="px-6 py-3 text-center">
                   <button 
@@ -307,7 +310,7 @@ export default function ReportsDashboard() {
     const keys = Object.keys(arrayData[0]).filter(k => k !== 'id' && typeof arrayData[0][k] !== 'object');
 
     return (
-      <table className="w-full text-sm text-left font-mono">
+      <table className="w-full text-sm text-left font-mono min-w-max">
         <thead className="text-xs uppercase bg-slate-900 text-slate-400 border-b border-slate-700">
           <tr>
             {keys.map(key => <th key={key} className="px-6 py-4">{key}</th>)}
@@ -346,13 +349,21 @@ export default function ReportsDashboard() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
-      {/* Sidebar de Reportes Dinámico */}
-      <div className="w-72 bg-slate-900 border-r border-slate-700/50 flex flex-col pt-4 overflow-y-auto">
-        <h2 className="px-6 text-sm font-semibold uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
-          <FileText className="w-5 h-5" /> Explorador
-        </h2>
-        <div className="flex-1 space-y-4 px-3">
+    <div className="flex h-full lg:h-[calc(100vh-64px)] overflow-hidden relative">
+      {/* Sidebar de Reportes Dinámico (Drawer en Mobile) */}
+      <div className={`
+        ${showExplorer ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        fixed lg:relative inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-slate-700/50 flex flex-col pt-4 overflow-y-auto transition-transform duration-300 ease-in-out
+      `}>
+        <div className="flex justify-between items-center px-6 lg:px-4 mb-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+            <FileText className="w-5 h-5" /> Explorador
+          </h2>
+          <button className="lg:hidden p-1 text-slate-400" onClick={() => setShowExplorer(false)}>
+             <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="flex-1 space-y-4 px-3 pb-20 lg:pb-4">
           {REPORT_CATEGORIES.map(category => (
             <div key={category.id} className="mb-2">
               <button
@@ -394,58 +405,74 @@ export default function ReportsDashboard() {
         </div>
       </div>
 
-      {/* Área Principal */}
-      <div className="flex-1 flex flex-col bg-[#0F172A] relative">
-        <div className="p-4 pb-3 border-b border-slate-700/50 bg-[#0F172A]/90 backdrop-blur-sm z-10 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-white flex items-center gap-3">
-              <activeReport.icon className="w-6 h-6 text-indigo-400" />
-              {activeReport.title}
-            </h1>
+      {/* Overlay for mobile sidebar */}
+      {showExplorer && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-30 lg:hidden backdrop-blur-sm"
+          onClick={() => setShowExplorer(false)}
+        />
+      )}
 
-            <div className="flex items-center gap-1 bg-slate-800/50 p-1 rounded-lg border border-slate-700">
+      {/* Área Principal */}
+      <div className="flex-1 flex flex-col bg-[#0F172A] relative overflow-hidden">
+        <div className="p-4 pb-3 border-b border-slate-700/50 bg-[#0F172A]/90 backdrop-blur-md z-10 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <button 
+                className="lg:hidden p-2 bg-slate-800 rounded-lg text-indigo-400"
+                onClick={() => setShowExplorer(true)}
+              >
+                <Filter className="w-5 h-5" />
+              </button>
+              <h1 className="text-lg md:text-xl font-bold text-white flex items-center gap-2 truncate">
+                <activeReport.icon className="w-5 h-5 md:w-6 md:h-6 text-indigo-400 flex-shrink-0" />
+                <span className="truncate">{activeReport.title}</span>
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-1 bg-slate-800/50 p-1 rounded-lg border border-slate-700 flex-shrink-0">
               <button
                 onClick={() => setActiveTab('GRID')}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-md text-xs md:text-sm font-medium transition-all ${
                   activeTab === 'GRID' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <Search className="w-4 h-4" /> Grilla
+                <Search className="w-4 h-4" /> <span className="hidden sm:inline">Grilla</span>
               </button>
               <button
                 onClick={() => setActiveTab('PRINT')}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-md text-xs md:text-sm font-medium transition-all ${
                   activeTab === 'PRINT' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <Printer className="w-4 h-4" /> Visualizador
+                <Printer className="w-4 h-4" /> <span className="hidden sm:inline">Visualizador</span>
               </button>
             </div>
           </div>
 
-          {/* Dynamic Filters Compacted */}
-          <div className="flex flex-wrap gap-3 items-end bg-slate-800/30 p-3 rounded-xl border border-slate-700/50 shadow-sm">
-            <div className="flex items-center gap-2 px-2 border-r border-slate-700 mr-1 text-slate-500">
+          {/* Dynamic Filters Compacted - Now with scroll for mobile */}
+          <div className="flex items-end gap-3 bg-slate-800/30 p-3 rounded-xl border border-slate-700/50 shadow-sm overflow-x-auto custom-scrollbar no-scrollbar-on-mobile">
+            <div className="flex items-center gap-2 px-2 border-r border-slate-700 mr-1 text-slate-500 flex-shrink-0">
               <Filter className="w-4 h-4" />
             </div>
 
             {activeReport.requiredFilters.includes('date-range') && (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase text-slate-400">Desde</label>
-                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm" />
+                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <label className="text-[10px] font-semibold uppercase text-slate-400">Desde</label>
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-xs py-1" />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase text-slate-400">Hasta</label>
-                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm" />
+                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <label className="text-[10px] font-semibold uppercase text-slate-400">Hasta</label>
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-xs py-1" />
                 </div>
               </>
             )}
 
             {activeReport.requiredFilters.includes('seller') && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase text-slate-400">Vendedor</label>
-                <select value={selectedSeller} onChange={e => setSelectedSeller(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm min-w-[150px]">
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <label className="text-[10px] font-semibold uppercase text-slate-400">Vendedor</label>
+                <select value={selectedSeller} onChange={e => setSelectedSeller(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-xs py-1 min-w-[120px]">
                   <option value="">TODOS</option>
                   {sellers.map((s:any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
@@ -453,19 +480,19 @@ export default function ReportsDashboard() {
             )}
 
             {activeReport.requiredFilters.includes('customer') && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase text-slate-400">Cliente (Requerido)</label>
-                <select value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm min-w-[200px]">
-                  <option value="">Selecciona Cliente...</option>
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <label className="text-[10px] font-semibold uppercase text-slate-400">Cliente</label>
+                <select value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-xs py-1 min-w-[150px]">
+                  <option value="">Selecciona...</option>
                   {customersList.map((c:any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
             )}
 
             {activeReport.requiredFilters.includes('branch') && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase text-slate-400">Sucursal</label>
-                <select value={selectedBranch} onChange={e => setSelectedBranch(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm min-w-[150px]">
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <label className="text-[10px] font-semibold uppercase text-slate-400">Sucursal</label>
+                <select value={selectedBranch} onChange={e => setSelectedBranch(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-xs py-1 min-w-[120px]">
                   <option value="">TODAS</option>
                   {branches.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
@@ -473,9 +500,9 @@ export default function ReportsDashboard() {
             )}
 
             {activeReport.requiredFilters.includes('item') && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase text-slate-400">Producto / Item</label>
-                <select value={selectedItem} onChange={e => setSelectedItem(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm min-w-[150px]">
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <label className="text-[10px] font-semibold uppercase text-slate-400">Producto</label>
+                <select value={selectedItem} onChange={e => setSelectedItem(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-xs py-1 min-w-[120px]">
                   <option value="">TODOS</option>
                   {items.map((it:any) => <option key={it.id} value={it.id}>{it.name}</option>)}
                 </select>
@@ -483,77 +510,77 @@ export default function ReportsDashboard() {
             )}
 
             {activeReport.requiredFilters.includes('systemNumber') && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase text-slate-400">No. Documento</label>
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <label className="text-[10px] font-semibold uppercase text-slate-400">N° Documento</label>
                 <input 
                   type="text" 
                   value={systemNumber} 
                   onChange={e => setSystemNumber(e.target.value)} 
                   placeholder="Ej. VTA-..." 
-                  className="input bg-slate-900 border-slate-700 text-white text-sm" 
+                  className="input bg-slate-900 border-slate-700 text-white text-xs py-1" 
                 />
               </div>
             )}
 
             {activeReport.requiredFilters.includes('year-month') && (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase text-slate-400">Año</label>
-                  <input type="number" min="2000" max="2100" value={year} onChange={e => setYear(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm w-24" />
+                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <label className="text-[10px] font-semibold uppercase text-slate-400">Año</label>
+                  <input type="number" min="2000" max="2100" value={year} onChange={e => setYear(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-xs py-1 w-16" />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase text-slate-400">Mes (Opcional)</label>
-                  <select value={month} onChange={e => setMonth(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-sm min-w-[150px]">
+                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <label className="text-[10px] font-semibold uppercase text-slate-400">Mes</label>
+                  <select value={month} onChange={e => setMonth(e.target.value)} className="input bg-slate-900 border-slate-700 text-white text-xs py-1 min-w-[120px]">
                     <option value="">Todo el año</option>
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
+                    {[
+                      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                    ].map((m, idx) => (
+                      <option key={idx} value={idx + 1}>{m}</option>
+                    ))}
                   </select>
                 </div>
               </>
             )}
 
-            <div className="flex-1" />
+            <div className="flex-1 min-w-[20px]" />
 
-            <button onClick={loadData} disabled={loading} className="btn btn-primary shadow-lg shadow-indigo-500/20 px-6">
-              {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><RefreshCw className="w-5 h-5" /> Generar Datos</>}
+            <button onClick={loadData} disabled={loading} className="btn btn-primary shadow-lg shadow-indigo-500/20 px-4 md:px-6 py-2 flex-shrink-0 text-xs md:text-sm">
+              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <><RefreshCw className="w-4 h-4" /> <span className="hidden sm:inline">Generar Datos</span><span className="sm:hidden">Ejecutar</span></>}
             </button>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto p-6 bg-slate-900/30">
+        <div className="flex-1 overflow-auto p-3 md:p-6 bg-slate-900/30">
           {!data && !loading ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500">
-              <activeReport.icon className="w-16 h-16 mb-4 opacity-20" />
-              <p className="text-lg">Selecciona los filtros y haz clic en "Generar Datos"</p>
+            <div className="h-full flex flex-col items-center justify-center text-slate-500 text-center px-4">
+              <activeReport.icon className="w-12 h-12 md:w-16 md:h-16 mb-4 opacity-20" />
+              <p className="text-sm md:text-lg">Selecciona los filtros y haz clic en "Generar Datos"</p>
+              <button 
+                className="lg:hidden mt-6 btn-soft px-6 py-3"
+                onClick={() => setShowExplorer(true)}
+              >
+                Abrir Explorador de Reportes
+              </button>
             </div>
           ) : activeTab === 'GRID' ? (
             <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto custom-scrollbar">
                 {renderGridData()}
               </div>
             </div>
           ) : (
-            <div className="max-w-[850px] mx-auto bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-2xl flex flex-col items-center">
+            <div className="w-full max-w-[850px] mx-auto bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-700 shadow-2xl flex flex-col items-center">
               <div className="w-full flex justify-between items-center mb-6">
-                <span className="text-sm font-medium text-slate-400">Previsualización del Documento</span>
-                <button onClick={() => handlePrint()} className="btn btn-primary px-6 shadow-lg shadow-indigo-500/20">
-                  <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
+                <span className="text-xs md:text-sm font-medium text-slate-400">Previsualización del Documento</span>
+                <button onClick={() => handlePrint()} className="btn btn-primary px-4 md:px-6 shadow-lg shadow-indigo-500/20 text-xs md:text-sm">
+                  <Printer className="w-4 h-4 mr-2" /> <span className="hidden sm:inline">Imprimir / PDF</span><span className="sm:hidden">Print</span>
                 </button>
               </div>
 
-              <div className="w-full aspect-[1/1.414] bg-white rounded-lg overflow-hidden shadow-inner flex shadow-[0_0_15px_rgba(0,0,0,0.5)] transform scale-[0.85] origin-top">
-                <div className="w-full h-full overflow-y-auto">
+              <div className="w-full bg-white rounded-lg overflow-hidden shadow-inner flex shadow-[0_0_15px_rgba(0,0,0,0.5)] transform lg:scale-95 origin-top">
+                <div className="w-full h-full overflow-y-auto max-h-[60vh] md:max-h-none">
                   {renderPrintTemplate()}
                 </div>
               </div>

@@ -26,9 +26,9 @@
 - 🏢 **Multi-Sede**: Gestión de múltiples ubicaciones físicas.
 - 👥 **Control de Acceso**: Sistema de roles (ADMIN/VENDEDOR).
 - 🔐 **Autenticación JWT**: Seguridad robusta.
-- 📊 **Inventario en Tiempo Real**: Control preciso de stock y Kardex.
-- 🎯 **Arquitectura Modular**: Fácil de mantener y escalar.
-- 🖨️ **Impresión Profesional**: Soporte dinámico para tirillas de 80mm y reportes A4.
+- 📈 **Análisis de Ventas**: Reportes detallados con visualización inteligente.
+- 📱 **Mobile-First Elite**: Interfaz 100% optimizada para iPads y iPhones.
+- ✨ **UI Premium**: Estética moderna con scrollbars personalizados y diseño cristalino.
 
 ---
 
