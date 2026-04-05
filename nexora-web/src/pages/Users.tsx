@@ -112,10 +112,10 @@ export default function Users() {
 
   return (
     <div className="card p-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-semibold">Usuarios</h1>
-          <p className="text-sm text-slate-500">Gestión de usuarios multi-sede</p>
+          <h1 className="text-2xl font-bold text-white">Usuarios</h1>
+          <p className="text-sm text-slate-300">Gestión de usuarios multi-sede</p>
         </div>
 
         <button 
@@ -126,20 +126,19 @@ export default function Users() {
         </button>
       </div>
 
-      {/* MODAL DE CREACIÓN */}
+      {/* MODAL DE CREACIÓN - NEXORA STYLE */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all animate-in fade-in duration-300">
-          <div className="card w-full max-w-lg p-8 shadow-2xl border-white/20 animate-in zoom-in-95 duration-200">
-            <h2 className="text-xl font-bold mb-1">Nuevo Usuario</h2>
-            <p className="text-sm text-slate-500 mb-6">Completa los datos para el nuevo vendedor</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-slate-950 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-800 animate-in zoom-in-95 duration-200">
+            <h2 className="text-xl font-bold mb-4 text-white">Nuevo Usuario</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="label block mb-1">Nombre Completo</label>
+                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">Nombre Completo</label>
                 <input
                   type="text"
                   required
-                  className="input"
+                  className="input w-full bg-slate-900 border-slate-700 text-white"
                   placeholder="Ej: Juan Pérez"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -147,11 +146,11 @@ export default function Users() {
               </div>
 
               <div>
-                <label className="label block mb-1">Email</label>
+                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">Email Corporativo</label>
                 <input
                   type="email"
                   required
-                  className="input"
+                  className="input w-full bg-slate-900 border-slate-700 text-white"
                   placeholder="juan@nexora.com"
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -159,11 +158,11 @@ export default function Users() {
               </div>
 
               <div>
-                <label className="label block mb-1">Contraseña</label>
+                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">Contraseña Temporal</label>
                 <input
                   type="password"
                   required
-                  className="input"
+                  className="input w-full bg-slate-900 border-slate-700 text-white"
                   placeholder="Mínimo 6 caracteres"
                   value={formData.password}
                   onChange={e => setFormData({ ...formData, password: e.target.value })}
@@ -171,17 +170,17 @@ export default function Users() {
               </div>
 
               <div>
-                <label className="label block mb-1">Asignar Sedes</label>
-                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
+                <label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">Asignar Sedes</label>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1 custom-scrollbar">
                   {availableBranches.map(b => (
                     <button
                       key={b.id}
                       type="button"
                       onClick={() => toggleBranch(b.id)}
-                      className={`pill transition-all ${
+                      className={`pill transition-all whitespace-nowrap ${
                         formData.branchIds.includes(b.id)
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-slate-100 text-slate-600 border-slate-200 hover:border-indigo-300"
+                          ? "bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-600/20"
+                          : "bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500"
                       }`}
                     >
                       {b.name}
@@ -191,15 +190,15 @@ export default function Users() {
               </div>
 
               {error && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-sm animate-in shake duration-300">
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs animate-in shake duration-300">
                   {Array.isArray(error) ? error.join(", ") : error}
                 </div>
               )}
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-6">
                 <button
                   type="button"
-                  className="btn-soft flex-1"
+                  className="btn-soft flex-1 py-3"
                   onClick={() => setShowModal(false)}
                   disabled={isSubmitting}
                 >
@@ -207,10 +206,10 @@ export default function Users() {
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary flex-1"
+                  className="btn-primary flex-1 py-3 font-semibold"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Guardando..." : "Crear Usuario"}
+                  {isSubmitting ? "Procesando..." : "Crear Usuario"}
                 </button>
               </div>
             </form>
@@ -222,15 +221,15 @@ export default function Users() {
         <div className="mt-6 text-slate-500">Cargando usuarios...</div>
       ) : (
         <div className="mt-6 overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse text-left">
             <thead>
-              <tr className="bg-indigo-50 text-indigo-900 text-sm">
-                <th className="text-left px-4 py-3 rounded-l-xl">ID</th>
-                <th className="text-left px-4 py-3">Nombre</th>
-                <th className="text-left px-4 py-3">Email</th>
-                <th className="text-left px-4 py-3">Rol</th>
-                <th className="text-left px-4 py-3">Sedes</th>
-                <th className="text-left px-4 py-3 rounded-r-xl">Estado</th>
+              <tr className="bg-slate-800 text-slate-200 text-sm">
+                <th className="px-4 py-3 rounded-l-xl">ID</th>
+                <th className="px-4 py-3">Nombre</th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Rol</th>
+                <th className="px-4 py-3">Sedes</th>
+                <th className="px-4 py-3 rounded-r-xl">Estado</th>
               </tr>
             </thead>
 
@@ -238,7 +237,7 @@ export default function Users() {
               {users.map((u) => (
                 <tr
                   key={u.id}
-                  className="border-b border-slate-200 hover:bg-slate-50 transition"
+                  className="border-b border-slate-800/50 hover:bg-slate-800/40 transition"
                 >
                   <td className="px-4 py-3 font-medium">{u.id}</td>
                   <td className="px-4 py-3">{u.name}</td>
@@ -262,7 +261,7 @@ export default function Users() {
                     {u.isActive ? (
                       <span className="pill-emerald">Activo</span>
                     ) : (
-                      <span className="pill bg-rose-100 text-rose-800">Inactivo</span>
+                      <span className="pill bg-rose-500/10 text-rose-400 border border-rose-500/20">Inactivo</span>
                     )}
                   </td>
                 </tr>
