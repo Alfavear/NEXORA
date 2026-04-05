@@ -7,8 +7,8 @@ export default function Login() {
   const { login, me, switchBranch } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("juan@nexora.com");
-  const [password, setPassword] = useState("Vendedor123*");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string>("");
 
   const [step, setStep] = useState<"LOGIN" | "PICK_BRANCH">("LOGIN");
@@ -79,7 +79,9 @@ export default function Login() {
             <div>
               <div className="label mb-1">Email</div>
               <input
+                type="email"
                 className="input"
+                placeholder="Ingresa tu correo"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -88,6 +90,7 @@ export default function Login() {
             <div>
               <div className="label mb-1">Contraseña</div>
               <input
+                placeholder="Ingresa tu contraseña"
                 className="input"
                 type="password"
                 value={password}

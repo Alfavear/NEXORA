@@ -21,12 +21,28 @@ export class InventoryService {
     return { companyId: user.companyId, role: user.role.name };
   }
 
-  async kardex(userId: number, itemId: number) {
+  private async getActorCompanyId(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { companyId: true },
+    });
+    if (!user) throw new BadRequestException('Usuario inválido');
+    return user.companyId;
+  }
+
+  async kardex(userId: number, itemId: number, branchId?: number) {
     if (!itemId) throw new BadRequestException('itemId requerido');
 
+    const companyId = await this.getActorCompanyId(userId);
+
+    const whereClause: any = { itemId, companyId };
+    if (branchId) {
+      whereClause.branchId = branchId;
+    }
+
     const movements = await this.prisma.inventoryMovement.findMany({
-      where: { itemId },
-      include: { item: true },
+      where: whereClause,
+      include: { item: true, branch: true, createdBy: true },
       orderBy: { createdAt: 'asc' },
     });
 
@@ -36,8 +52,10 @@ export class InventoryService {
       quantity: m.quantity,
       balance: m.balanceAfter,
       reference: m.reference,
-      notes: m.notes,
       itemName: m.item?.name,
+      branchName: m.branch?.name,
+      userName: m.createdBy?.name || 'Sistema',
+      notes: m.notes,
     }));
   }
 

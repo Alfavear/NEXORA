@@ -72,7 +72,7 @@ export class SalesController {
       req.user.sub,
       Number(id),
       dto.amount,
-      dto.method,
+      dto.paymentMethodId,
       dto.notes,
     );
   }

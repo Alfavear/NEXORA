@@ -32,9 +32,15 @@ export class SalesService {
       },
     });
 
-    let total = 0;
+    let calculatedSubtotal = 0;
+    let calculatedTax = 0;
+    let calculatedTotal = 0;
 
     for (const item of dto.items) {
+      const product = await this.prisma.item.findUnique({ where: { id: item.itemId } });      if (!product) {
+        throw new BadRequestException(`Producto ${item.itemId} no encontrado`);
+      }
+
       const stock = await this.prisma.branchStock.findFirst({
         where: { itemId: item.itemId, branchId },
       });
@@ -67,8 +73,9 @@ export class SalesService {
 
       const isGift = Boolean((item as any).isGift);
       const itemPrice = isGift ? 0 : Number(item.unitPrice);
+      const lineSubtotal = item.quantity * itemPrice;
 
-      total += item.quantity * itemPrice;
+      calculatedSubtotal += lineSubtotal;
 
       await this.prisma.saleDetail.create({
         data: {
@@ -76,15 +83,42 @@ export class SalesService {
           itemId: item.itemId,
           quantity: item.quantity,
           unitPrice: itemPrice,
-          subtotal: item.quantity * itemPrice,
+          subtotal: lineSubtotal,
           isGift,
         },
       });
     }
 
+    // New Tax Calculation Logic
+    if (dto.taxIds && dto.taxIds.length > 0) {
+      const taxes = await this.prisma.tax.findMany({
+        where: {
+          id: { in: dto.taxIds },
+          companyId,
+          isActive: true,
+        },
+      });
+
+      for (const tax of taxes) {
+        calculatedTax += calculatedSubtotal * (Number(tax.rate) / 100);
+      }
+    }
+    calculatedTotal = calculatedSubtotal + calculatedTax;
+
     const isCredit = Boolean(dto.isCredit);
     const dueDate = dto.dueDate ? new Date(dto.dueDate) : null;
-    const initialPayment = Number(dto.initialPayment || 0);
+    const payments = dto.payments || [];
+    
+    let paidAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+
+    let interestAmount = 0;
+    if (isCredit && dto.interestRate && dto.interestRate > 0) {
+      const financedAmount = calculatedTotal - paidAmount;
+      if (financedAmount > 0) {
+        interestAmount = financedAmount * (dto.interestRate / 100);
+        calculatedTotal += interestAmount;
+      }
+    }
 
     if (isCredit && !dueDate) {
       throw new BadRequestException(
@@ -92,63 +126,108 @@ export class SalesService {
       );
     }
 
-    if (initialPayment > total) {
+    if (paidAmount > calculatedTotal) {
       throw new BadRequestException(
-        'El pago inicial no puede exceder el total',
+        'La suma total de pagos no puede exceder el total de la venta',
       );
     }
 
-    let paidAmount = 0;
-    let outstanding = total;
+    let outstanding = Number((calculatedTotal - paidAmount).toFixed(2));
     let paymentStatus: 'PAID' | 'PARTIAL' | 'PENDING' = 'PAID';
 
-    if (!isCredit) {
-      paidAmount = total;
+    if (outstanding <= 0) {
       outstanding = 0;
       paymentStatus = 'PAID';
+    } else if (paidAmount <= 0) {
+      paymentStatus = 'PENDING';
     } else {
-      paidAmount = initialPayment;
-      outstanding = Number((total - initialPayment).toFixed(2));
-      if (outstanding <= 0) {
-        outstanding = 0;
-        paymentStatus = 'PAID';
-      } else if (paidAmount <= 0) {
-        paymentStatus = 'PENDING';
-      } else {
-        paymentStatus = 'PARTIAL';
-      }
+      paymentStatus = 'PARTIAL';
     }
 
-    await this.prisma.sale.update({
+    const updatedSale = await this.prisma.sale.update({
       where: { id: sale.id },
       data: {
-        subtotal: total,
-        total,
+        subtotal: Number(calculatedSubtotal.toFixed(2)),
+        tax: Number(calculatedTax.toFixed(2)),
+        total: Number(calculatedTotal.toFixed(2)),
         isCredit,
         dueDate: dueDate ?? null,
+        installments: dto.installments || 1,
+        interestRate: dto.interestRate || 0,
+        lateInterestRate: dto.lateInterestRate || 0,
+        interestAmount: Number(interestAmount.toFixed(2)),
         paidAmount,
         outstanding,
         paymentStatus,
       },
     });
 
-    if (paidAmount > 0) {
-      await this.prisma.salePayment.create({
-        data: {
-          saleId: sale.id,
-          amount: paidAmount,
-          method: isCredit ? 'Pago inicial' : 'Contado',
-          notes: isCredit ? 'Pago inicial en venta a crédito' : 'Venta contado',
-        },
+    if (dto.taxIds && dto.taxIds.length > 0) {
+      await this.prisma.saleTax.createMany({
+        data: dto.taxIds.map(taxId => ({
+          saleId: updatedSale.id,
+          taxId: taxId,
+        })),
       });
+    }
+
+    // Generación de Tabla de Amortización
+    if (isCredit && dto.installments && dto.installments > 0 && dueDate) {
+      const financedAmount = Number(calculatedTotal.toFixed(2)) - paidAmount;
+      if (financedAmount > 0) {
+        const baseQuotaAmount = Math.floor((financedAmount / dto.installments) * 100) / 100;
+        let remainingToDistribute = financedAmount;
+        let currentDueDate = new Date(dueDate);
+        const installmentsData: {
+          saleId: number;
+          quotaNumber: number;
+          dueDate: Date;
+          amount: number;
+        }[] = [];
+
+        for (let i = 1; i <= dto.installments; i++) {
+          let amountForThisQuota = baseQuotaAmount;
+          if (i === dto.installments) {
+            amountForThisQuota = remainingToDistribute; // La última cuota absorbe los centavos restantes
+          } else {
+            remainingToDistribute -= baseQuotaAmount;
+          }
+
+          installmentsData.push({
+            saleId: updatedSale.id,
+            quotaNumber: i,
+            dueDate: new Date(currentDueDate),
+            amount: Number(amountForThisQuota.toFixed(2)),
+          });
+          // Proyectamos un mes hacia el futuro para la siguiente cuota
+          currentDueDate.setMonth(currentDueDate.getMonth() + 1);
+        }
+        await this.prisma.saleInstallment.createMany({ data: installmentsData });
+      }
+    }
+
+    for (const payment of payments) {
+      if (payment.amount > 0) {
+        await this.prisma.salePayment.create({
+          data: {
+            saleId: sale.id,
+            paymentMethodId: payment.paymentMethodId,
+            amount: payment.amount,
+            notes: 'Abono inicial en venta',
+          },
+        });
+      }
     }
 
     return this.prisma.sale.findUnique({
       where: { id: sale.id },
       include: {
         customer: true,
+        branch: true,
         details: { include: { item: true } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
+        saleTaxes: { include: { tax: true } },
+        amortization: { orderBy: { quotaNumber: 'asc' } },
       },
     });
   }
@@ -159,7 +238,10 @@ export class SalesService {
       where: { companyId },
       include: {
         customer: true,
+        branch: true,
         details: { include: { item: true } },
+        saleTaxes: { include: { tax: true } },
+        amortization: { orderBy: { quotaNumber: 'asc' } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -171,9 +253,12 @@ export class SalesService {
       where: { id, companyId },
       include: {
         customer: true,
+        branch: true,
         details: { include: { item: true } },
         returns: { include: { details: { include: { item: true } } } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
+        saleTaxes: { include: { tax: true } },
+        amortization: { orderBy: { quotaNumber: 'asc' } },
       },
     });
     if (!sale) throw new NotFoundException('Venta no encontrada');
@@ -186,8 +271,11 @@ export class SalesService {
       where: { companyId, outstanding: { gt: 0 } },
       include: {
         customer: true,
+        branch: true,
         details: { include: { item: true } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
+        saleTaxes: { include: { tax: true } },
+        amortization: { orderBy: { quotaNumber: 'asc' } },
       },
       orderBy: { dueDate: 'asc' },
     });
@@ -212,7 +300,7 @@ export class SalesService {
     userId: number,
     saleId: number,
     amount: number,
-    method: string,
+    paymentMethodId: number,
     notes?: string,
   ) {
     const { companyId } = await this.getUserContext(userId);
@@ -244,7 +332,7 @@ export class SalesService {
       data: {
         saleId,
         amount,
-        method,
+        paymentMethodId,
         notes,
       },
     });
@@ -259,7 +347,7 @@ export class SalesService {
       include: {
         customer: true,
         details: { include: { item: true } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
       },
     });
   }
@@ -473,8 +561,11 @@ export class SalesService {
       where,
       include: {
         customer: true,
+        branch: true,
         details: { include: { item: true } },
-        payments: true,
+        payments: { include: { paymentMethod: true } },
+        saleTaxes: { include: { tax: true } },
+        amortization: { orderBy: { quotaNumber: 'asc' } },
       },
       orderBy: { dueDate: 'asc' },
     });

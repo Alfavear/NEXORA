@@ -1,8 +1,9 @@
 import http from './http';
 
 export const inventoryApi = {
-  kardex(itemId: number) {
-    return http.get(`/inventory/kardex?itemId=${itemId}`);
+  kardex(itemId: number, branchId: number = 0) {
+    const query = branchId > 0 ? `?itemId=${itemId}&branchId=${branchId}` : `?itemId=${itemId}`;
+    return http.get(`/inventory/kardex${query}`);
   },
   transfer(payload: { itemId: number; fromBranchId: number; toBranchId: number; quantity: number }) {
     return http.post('/inventory/transfer', payload);

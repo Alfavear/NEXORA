@@ -122,10 +122,30 @@ async function main() {
     });
   }
 
+  // 6️⃣ Métodos de pago
+  const paymentMethods = [
+    'Efectivo',
+    'Cheque',
+    'Depósito Transferencia',
+    'Tarjeta Crédito o Débito',
+    'Otros Cobros',
+    'Nota de Crédito',
+    'Letra de Cambio',
+  ];
+
+  for (const pm of paymentMethods) {
+    await prisma.paymentMethod.upsert({
+      where: { companyId_name: { companyId: company.id, name: pm } },
+      update: {},
+      create: { name: pm, companyId: company.id },
+    });
+  }
+
   console.log('✅ Seed completado correctamente');
   console.log('ADMIN: admin@nexora.com / Admin123*');
   console.log('VENDEDOR: vendedor@nexora.com / Vendedor123*');
   console.log('Sedes: 1 (Principal), 2 (Norte)');
+
 }
 
 main()

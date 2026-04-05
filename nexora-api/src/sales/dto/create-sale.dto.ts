@@ -12,6 +12,17 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+class SalePaymentInputDto {
+  @IsInt()
+  @Min(1)
+  paymentMethodId: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0.01)
+  amount: number;
+}
+
 class CreateSaleItemDto {
   @IsInt()
   @Min(1)
@@ -54,10 +65,38 @@ export class CreateSaleDto {
   dueDate?: string;
 
   @IsOptional()
-  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  installments?: number;
+
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  initialPayment?: number;
+  interestRate?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  lateInterestRate?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  taxIds?: number[];
+
+  @IsOptional()
+  @IsNumber()
+  subtotal?: number;
+
+  @IsOptional()
+  @IsNumber()
+  total?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SalePaymentInputDto)
+  payments?: SalePaymentInputDto[];
 
   @IsArray()
   @ArrayMinSize(1)

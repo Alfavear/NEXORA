@@ -15,6 +15,10 @@ import { RolesModule } from './roles/roles.module';
 import { ItemGroupsModule } from './item-groups/item-groups.module';
 import { ItemBrandsModule } from './item-brands/item-brands.module';
 import { ItemOwnersModule } from './item-owners/item-owners.module';
+import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
+import { ReportsModule } from './reports/reports.module';
+import { PurchasesModule } from './purchases/purchases.module';
+import { TaxesModule } from './taxes/taxes.module';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { ItemOwnersModule } from './item-owners/item-owners.module';
     ItemGroupsModule,
     ItemBrandsModule,
     ItemOwnersModule,
+    PaymentMethodsModule,
+    ReportsModule,
+    PurchasesModule,
+    TaxesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

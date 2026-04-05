@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { customersApi } from '../api/customers';
 import type { Customer, CreateCustomerDto } from '../api/customers';
+import { Search, X } from 'lucide-react';
 
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -114,154 +115,85 @@ export default function Customers() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-600">Cargando clientes...</div>
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        <div className="text-lg">Cargando clientes...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div className="card p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Clientes</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Clientes</h1>
+          <p className="text-sm text-slate-300">Directorio y gestión de clientes</p>
+        </div>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+          className="btn-primary"
         >
           + Nuevo Cliente
         </button>
       </div>
 
-      {/* Barra de búsqueda */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Buscar por nombre, cédula/RUC o email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-        />
-      </div>
-
-      {/* Filtros */}
-      <div className="mb-4 flex gap-2">
-        <button
-          onClick={() => setFilter('active')}
-          className={`px-4 py-2 rounded-lg transition ${
-            filter === 'active'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Activos
-        </button>
-        <button
-          onClick={() => setFilter('inactive')}
-          className={`px-4 py-2 rounded-lg transition ${
-            filter === 'inactive'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Inactivos
-        </button>
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg transition ${
-            filter === 'all'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Todos
-        </button>
-      </div>
-
-      {errors && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
-          {errors}
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+        <div className="flex gap-2">
+          <button onClick={() => setFilter('active')} className={`btn ${filter === 'active' ? 'btn-primary' : 'btn-soft'}`}>Activos</button>
+          <button onClick={() => setFilter('inactive')} className={`btn ${filter === 'inactive' ? 'btn-primary' : 'btn-soft'}`}>Inactivos</button>
+          <button onClick={() => setFilter('all')} className={`btn ${filter === 'all' ? 'btn-primary' : 'btn-soft'}`}>Todos</button>
         </div>
-      )}
+        <div className="relative w-full md:w-80">
+          <Search className="w-5 h-5 absolute left-3 top-2 text-slate-400" />
+          <input
+            className="input pl-10 w-full"
+            placeholder="Buscar cliente..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
-      {/* Tabla */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      {errors && <div className="mb-4 p-3 bg-rose-500/20 border border-rose-500/50 text-rose-300 rounded-lg">{errors}</div>}
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-max text-left border-collapse">
+          <thead className="bg-slate-800 text-slate-200">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Nombre
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Cédula/RUC
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Teléfono
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Estado
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                Acciones
-              </th>
+              <th className="px-4 py-3">Nombre</th>
+              <th className="px-4 py-3">Cédula/RUC</th>
+              <th className="px-4 py-3">Teléfono</th>
+              <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-slate-700/50">
             {filteredCustomers.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
                   {searchTerm ? 'No se encontraron clientes' : 'No hay clientes registrados'}
                 </td>
               </tr>
             ) : (
               filteredCustomers.map((customer) => (
-                <tr key={customer.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {customer.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {customer.document || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {customer.phone || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {customer.email || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        customer.isActive
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {customer.isActive ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(customer)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    >
-                      Editar
-                    </button>
+                <tr key={customer.id} className="hover:bg-slate-800/40 transition-colors">
+                  <td className="px-4 py-3 font-medium text-slate-200">{customer.name}</td>
+                  <td className="px-4 py-3 text-slate-400 font-mono text-sm">{customer.document || '-'}</td>
+                  <td className="px-4 py-3 text-slate-400">{customer.phone || '-'}</td>
+                  <td className="px-4 py-3 text-slate-400">{customer.email || '-'}</td>
+                  <td className="px-4 py-3">
                     {customer.isActive ? (
-                      <button
-                        onClick={() => handleDelete(customer.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Desactivar
-                      </button>
+                      <span className="pill bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Activo</span>
                     ) : (
-                      <button
-                        onClick={() => handleActivate(customer.id)}
-                        className="text-green-600 hover:text-green-900"
-                      >
-                        Activar
-                      </button>
+                      <span className="pill bg-rose-500/10 text-rose-400 border border-rose-500/20">Inactivo</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button onClick={() => handleEdit(customer)} className="btn-soft px-3 py-1 text-xs mr-2">Editar</button>
+                    {customer.isActive ? (
+                      <button onClick={() => handleDelete(customer.id)} className="btn-danger px-3 py-1 text-xs">Desactivar</button>
+                    ) : (
+                      <button onClick={() => handleActivate(customer.id)} className="btn-soft border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1 text-xs">Activar</button>
                     )}
                   </td>
                 </tr>
@@ -273,73 +205,64 @@ export default function Customers() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              {editingCustomer ? 'Editar Cliente' : 'Nuevo Cliente'}
-            </h2>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-slate-950 border border-slate-700 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+            <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+              <h2 className="text-xl font-bold text-white">{editingCustomer ? 'Editar Cliente' : 'Nuevo Cliente'}</h2>
+              <button onClick={handleCloseModal} className="text-slate-400 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+            </div>
 
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre *
-                  </label>
+                  <label className="block text-sm text-slate-400 mb-1">Nombre *</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="input w-full bg-slate-900 border-slate-700"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Cédula/RUC
-                  </label>
+                  <label className="block text-sm text-slate-400 mb-1">Cédula/RUC</label>
                   <input
                     type="text"
                     value={formData.document}
                     onChange={(e) => setFormData({ ...formData, document: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="input w-full bg-slate-900 border-slate-700"
                     maxLength={13}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono
-                  </label>
+                  <label className="block text-sm text-slate-400 mb-1">Teléfono</label>
                   <input
                     type="text"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="input w-full bg-slate-900 border-slate-700"
                     maxLength={20}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
+                  <label className="block text-sm text-slate-400 mb-1">Email</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="input w-full bg-slate-900 border-slate-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dirección
-                  </label>
+                  <label className="block text-sm text-slate-400 mb-1">Dirección</label>
                   <textarea
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="input w-full bg-slate-900 border-slate-700 resize-none h-20"
                     rows={3}
                     maxLength={200}
                   />
@@ -347,7 +270,7 @@ export default function Customers() {
               </div>
 
               {errors && (
-                <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                <div className="mt-4 p-3 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-lg text-sm">
                   {errors}
                 </div>
               )}
@@ -356,13 +279,13 @@ export default function Customers() {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                  className="btn-soft flex-1"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                  className="btn-primary flex-1 shadow-lg shadow-indigo-500/20"
                 >
                   {editingCustomer ? 'Actualizar' : 'Crear'}
                 </button>
