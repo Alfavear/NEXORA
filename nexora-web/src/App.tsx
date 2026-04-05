@@ -1,3 +1,4 @@
+// Nexora ERP - v1.0.1-STABLE-USER-FORM-LIVE
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import Shell from "./components/Shell";

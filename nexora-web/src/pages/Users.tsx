@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { listUsers, createUser } from "../api/users";
 import { useAuth } from "../auth/AuthContext";
-import { branchesApi, Branch } from "../api/branches";
+import { branchesApi } from "../api/branches";
+import type { Branch } from "../api/branches";
 
 type UserRow = {
   id: number;
